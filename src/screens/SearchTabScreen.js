@@ -6,7 +6,7 @@ import { MaterialIcons  } from '@expo/vector-icons';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 
-const SearchScreen = () => {
+const SearchTabScreen = () => {
 
   return (
     <NativeBaseProvider>
@@ -27,18 +27,19 @@ const SearchScreen = () => {
   )
 }
 
+const INPUT_WIDTH = SCREEN_WIDTH / 30;
+
 const styles = StyleSheet.create({
   root: {
     flex: 1,
     display: 'flex',
   },
   inputStyle: {
-    marginTop: 100,
-    marginLeft: 10,
-    marginRight: 10,
-    // width: SCREEN_WIDTH - 20,
+    marginTop: 80,
+    marginLeft: INPUT_WIDTH,
+    marginRight: INPUT_WIDTH,
 
   },
 })
 
-export {SearchScreen}
+export {SearchTabScreen}

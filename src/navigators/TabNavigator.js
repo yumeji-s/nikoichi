@@ -3,8 +3,10 @@ import { MaterialCommunityIcons } from '@expo/vector-icons'
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
 import { createStackNavigator } from '@react-navigation/stack'
 import { HomeScreen } from '../screens/HomeScreen'
-import { SearchScreen } from '../screens/SearchScreen'
+import { SearchScreen } from '../screens/SearchTabScreen'
 import { SwipeScreen } from '../screens/SwipeScreen'
+import { ChatRoomScreen } from '../screens/ChatRoomScreen'
+import { ChatTabScreen } from '../screens/ChatTabScreen'
 
 const Stack = createStackNavigator()
 
@@ -17,6 +19,30 @@ const HomeStackNavigator = () => (
       component={SwipeScreen}
       options={{
         headerTitle: 'メイン',
+        headerBackTitleVisible: false,
+        headerShown: false,
+      }}
+    />
+  </Stack.Navigator>
+  
+)
+
+const ChatStackNavigator = () => (
+  <Stack.Navigator initialRouteName="Main">
+    <Stack.Screen
+      name="Main"
+      component={ChatTabScreen}
+      options={{
+        headerTitle: 'チャット',
+        headerBackTitleVisible: false,
+        headerShown: false,
+      }}
+    />
+    <Stack.Screen
+      name="chatroom"
+      component={ChatRoomScreen}
+      options={{
+        headerTitle: '',
         headerBackTitleVisible: false,
         headerShown: false,
       }}
@@ -75,6 +101,9 @@ const TabNavigator = () => (
         else if (route.name === 'AppTab') {
           return <MaterialCommunityIcons name="fridge-top" size={24} />
         }
+        else if (route.name === 'ChatTab') {
+          return <MaterialCommunityIcons name="chat" size={24} />
+        }
       },
       "headerShown": false,
       "tabBarShowLabel": false,
@@ -89,6 +118,7 @@ const TabNavigator = () => (
     <ParentTab.Screen name="HomeTab" component={HomeStackNavigator} />
     <ParentTab.Screen name="UserTab" component={SearchStackNavigator} />
     <ParentTab.Screen name="AppTab" component={AppFirstStackNavigator} />
+    <ParentTab.Screen name="ChatTab" component={ChatStackNavigator} />
   </ParentTab.Navigator>
 )
 

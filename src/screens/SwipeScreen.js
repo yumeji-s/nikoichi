@@ -153,30 +153,30 @@ const SwipeScreen = () => {
           uri: Images.minami,
           goal: '若手No.1女優',
         },
-        // {
-        //   id: 2,
-        //   name: '新垣　結衣',
-        //   uri: Images.yui,
-        //   goal: '若手No.2女優',
-        // },
-        // {
-        //   id: 3,
-        //   name: '広瀬　すず',
-        //   uri: Images.suzu,
-        //   goal: '若手No.3女優',
-        // },
-        // {
-        //   id: 4,
-        //   name: '永野　芽郁',
-        //   uri: Images.mei,
-        //   goal: '若手No.4女優',
-        // },
-        // {
-        //   id: 5,
-        //   name: '今田　美桜',
-        //   uri: Images.mio,
-        //   goal: '若手No.5女優',
-        // },
+        {
+          id: 2,
+          name: '新垣　結衣',
+          uri: Images.yui,
+          goal: '若手No.2女優',
+        },
+        {
+          id: 3,
+          name: '広瀬　すず',
+          uri: Images.suzu,
+          goal: '若手No.3女優',
+        },
+        {
+          id: 4,
+          name: '永野　芽郁',
+          uri: Images.mei,
+          goal: '若手No.4女優',
+        },
+        {
+          id: 5,
+          name: '今田　美桜',
+          uri: Images.mio,
+          goal: '若手No.5女優',
+        },
       ];
 
     return (
@@ -196,7 +196,7 @@ const styles = StyleSheet.create({
       alignItems: 'center',
     },
     cardStyle: {
-      marginTop: 150,
+      marginTop: "10%",
       position: 'absolute',
       width: SCREEN_WIDTH,
       borderRadius: 50,
