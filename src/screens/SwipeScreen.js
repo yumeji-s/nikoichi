@@ -11,20 +11,18 @@ import {
   UIManager,
   Platform,
 } from 'react-native';
-import { Card, Button } from 'react-native-elements';
+import { Card, Button, Input } from 'react-native-elements';
 import Images from '../../assets/index';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
+const SCREEN_HEIGHT = Dimensions.get('window').height;
 const SWIPE_THRESHOLD = 0.25 * SCREEN_WIDTH;
 const SWIPE_OUT_DURATION = 250;
-
 
 const Deck = ({ data }) => {
   UIManager.setLayoutAnimationEnabledExperimental &&
     UIManager.setLayoutAnimationEnabledExperimental(true);
   LayoutAnimation.spring();
-
-  const [index, setIndex] = useState(0);
 
   const position = useRef(new Animated.ValueXY()).current;
   const panResponder = useRef(
@@ -53,6 +51,8 @@ const Deck = ({ data }) => {
       useNativeDriver: false,
     }).start(() => onSwipeComplete(direction));
   };
+  
+  const [index, setIndex] = useState(0);
 
   const onSwipeComplete = (direction) => {
     const item = data[index];
@@ -85,8 +85,6 @@ const Deck = ({ data }) => {
           if (i < index) {
             return null;
           }
-
-          console.info(`id: ${item.id}`)
 
           if (i === index) {
             return (
@@ -127,7 +125,7 @@ const RenderCards = ({ item }) => {
     <Card key={item.id}>
       <Card.Title style={styles.titleStyle}>{item.name}</Card.Title>
       <Card.Divider />
-      <Card.Image source={item.uri} />
+      <Card.Image source={item.uri} style={styles.imageStyle} resizeMode='contain'/>
       <Card.Divider />
       <Text style={styles.textStyle}>目標：{item.goal}</Text>
       <Button buttonStyle={styles.buttonStyle} title="プロフィールはこちら" onPress={() => {console.info(`name: ${item.name}`)}} />
@@ -137,11 +135,11 @@ const RenderCards = ({ item }) => {
 
 const RenderNoMoreCards = () => {
   return (
-    <Card>
+    <Card style={styles.cardStyle}>
       <Card.Title style={styles.titleStyle}>終了</Card.Title>
       <Card.Divider />
-      <Text style={styles.textStyle}>検索にかかった女優は以上です</Text>
-      <Button buttonStyle={styles.buttonStyle} title="もっと女優を探す" />
+      <Text style={styles.textStyle}>aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa</Text>
+      <Button buttonStyle={styles.buttonStyle} title="もう一度" onPress={() => {}}/>
     </Card>
   );
 };
@@ -150,65 +148,72 @@ const SwipeScreen = () => {
 
     const DATA = [
         {
-            id: 1,
-            name: '浜辺　美波',
-            uri: Images.minami,
-            goal: '若手No.1女優',
+          id: 1,
+          name: '浜辺　美波',
+          uri: Images.minami,
+          goal: '若手No.1女優',
         },
-        {
-            id: 2,
-            name: '新垣　結衣',
-            uri: Images.yui,
-            goal: '若手No.2女優',
-        },
-        {
-            id: 3,
-            name: '広瀬　すず',
-            uri: Images.suzu,
-            goal: '若手No.3女優',
-        },
-        {
-            id: 4,
-            name: '永野　芽郁',
-            uri: Images.mei,
-            goal: '若手No.4女優',
-        },
-        {
-            id: 5,
-            name: '今田　美桜',
-            uri: Images.mio,
-            goal: '若手No.5女優',
-        },
+        // {
+        //   id: 2,
+        //   name: '新垣　結衣',
+        //   uri: Images.yui,
+        //   goal: '若手No.2女優',
+        // },
+        // {
+        //   id: 3,
+        //   name: '広瀬　すず',
+        //   uri: Images.suzu,
+        //   goal: '若手No.3女優',
+        // },
+        // {
+        //   id: 4,
+        //   name: '永野　芽郁',
+        //   uri: Images.mei,
+        //   goal: '若手No.4女優',
+        // },
+        // {
+        //   id: 5,
+        //   name: '今田　美桜',
+        //   uri: Images.mio,
+        //   goal: '若手No.5女優',
+        // },
       ];
 
     return (
-    <View style={styles.container}>
-      <Deck data={DATA} />
-    </View>
+      <View style={styles.container}>
+        <Deck data={DATA} />
+      </View>
     );
 }
 
+const IMAGE_HEIGHT = SCREEN_HEIGHT / 2;
+
 const styles = StyleSheet.create({
     container: {
-        flex: 1,
-        marginTop: 40,
-        backgroundColor: '#fff',
-        alignItems: 'center',
-        justifyContent: 'center',
+      flex: 1,
+      marginTop: 40,
+      backgroundColor: '#fff',
+      alignItems: 'center',
     },
     cardStyle: {
-        position: 'absolute',
-        width: SCREEN_WIDTH,
+      marginTop: 150,
+      position: 'absolute',
+      width: SCREEN_WIDTH,
+      borderRadius: 50,
+    },
+    imageStyle: {
+      height: IMAGE_HEIGHT,
+      width: SCREEN_WIDTH,
     },
     titleStyle: { fontSize: 18 },
     textStyle: { marginBottom: 10, fontSize: 16 },
     buttonStyle: {
-        borderRadius: 0,
-        marginLeft: 0,
-        marginRight: 0,
-        marginBottom: 0,
+      borderRadius: 50,
+      marginLeft: 0,
+      marginRight: 0,
+      marginBottom: 0,
     },
 });
 
 
-export default SwipeScreen;
+export {SwipeScreen};

@@ -16,9 +16,6 @@ const HomeScreen = () => {
     <NativeBaseProvider>
       <View style={styles.root}>
         <View style={styles.actionBar}>
-          <TouchableOpacity style={styles.tweetButton} onPress={() => onTweet(text)}>
-            <Text style={styles.tweetButtonText}>ツイートする</Text>
-          </TouchableOpacity>
           <Button style={styles.button} onPress={() => navigation.navigate('Sub')}>sub画面へ</Button>
         </View>
         <TextInput style={styles.input} multiline={true} onChangeText={value => setText(value)}/> 
@@ -39,7 +36,7 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
     padding: 12,
   },
-  tweetButton: {
+  button: {
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
@@ -56,9 +53,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#f8f8f8',
     padding: 12,
   },
-  button: {
-
-  }
 })
 
-export default HomeScreen
+export {HomeScreen};
