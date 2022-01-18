@@ -11,7 +11,8 @@ import {
   UIManager,
   Platform,
 } from 'react-native';
-import { Card, Button, Input } from 'react-native-elements';
+import { Card, Button } from 'react-native-elements';
+
 import Images from '../../assets/index';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;

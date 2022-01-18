@@ -2,8 +2,9 @@ import React from 'react'
 import { MaterialCommunityIcons } from '@expo/vector-icons'
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
 import { createStackNavigator } from '@react-navigation/stack'
+
 import { HomeScreen } from '../screens/HomeScreen'
-import { SearchScreen } from '../screens/SearchTabScreen'
+import { SearchTabScreen } from '../screens/SearchTabScreen'
 import { SwipeScreen } from '../screens/SwipeScreen'
 import { ChatRoomScreen } from '../screens/ChatRoomScreen'
 import { ChatTabScreen } from '../screens/ChatTabScreen'
@@ -55,7 +56,7 @@ const SearchStackNavigator = () => (
   <Stack.Navigator initialRouteName="Main">
     <Stack.Screen
       name="Main"
-      component={SearchScreen}
+      component={SearchTabScreen}
       options={{
         headerBackTitleVisible: false,
         headerShown: false,
