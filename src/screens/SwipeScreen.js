@@ -13,7 +13,7 @@ import {
 } from 'react-native';
 import { Card, Button } from 'react-native-elements';
 
-import Images from '../../assets/index';
+import { images } from '../../assets/index';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 const SCREEN_HEIGHT = Dimensions.get('window').height;
@@ -151,31 +151,31 @@ const SwipeScreen = () => {
         {
           id: 1,
           name: '浜辺　美波',
-          uri: Images.minami,
+          uri: images.minami,
           goal: '若手No.1女優',
         },
         {
           id: 2,
           name: '新垣　結衣',
-          uri: Images.yui,
+          uri: images.yui,
           goal: '若手No.2女優',
         },
         {
           id: 3,
           name: '広瀬　すず',
-          uri: Images.suzu,
+          uri: images.suzu,
           goal: '若手No.3女優',
         },
         {
           id: 4,
           name: '永野　芽郁',
-          uri: Images.mei,
+          uri: images.mei,
           goal: '若手No.4女優',
         },
         {
           id: 5,
           name: '今田　美桜',
-          uri: Images.mio,
+          uri: images.mio,
           goal: '若手No.5女優',
         },
       ];

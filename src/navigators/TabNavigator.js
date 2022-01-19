@@ -11,8 +11,6 @@ import { ChatTabScreen } from '../screens/ChatTabScreen'
 
 const Stack = createStackNavigator()
 
-
-
 const HomeStackNavigator = () => (
   <Stack.Navigator initialRouteName="Main">
     <Stack.Screen
@@ -36,11 +34,12 @@ const ChatStackNavigator = () => (
       options={{
         headerTitle: 'チャット',
         headerBackTitleVisible: false,
-        headerShown: false,
+        headerTitleAlign: 'center',
+        // headerShown: false,
       }}
     />
     <Stack.Screen
-      name="chatroom"
+      name="Chatroom"
       component={ChatRoomScreen}
       options={{
         headerTitle: '',

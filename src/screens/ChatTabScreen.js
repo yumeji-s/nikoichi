@@ -6,11 +6,13 @@ import {
   View,
   TouchableOpacity,
   ScrollView,
+  StatusBar,
 } from 'react-native';
 import { Avatar, Input, Overlay, Icon } from 'react-native-elements';
 import { useNavigation } from '@react-navigation/native';
+import { MaterialIcons  } from '@expo/vector-icons';
 
-import Images from '../../assets/index';
+import { images } from '../../assets/index';
 
 const ChatTabScreen = () => {
   const navigation = useNavigation();
@@ -22,19 +24,18 @@ const ChatTabScreen = () => {
     const userList = [{
       uid: 1,
       name: "浜辺　美波",
-      avatar: Images.minami,
+      avatar: images.minami,
     },{
       uid: 2,
       name: "今田　美桜",
-      avatar: Images.mio,
+      avatar: images.mio,
     }]
     setUsers(userList);
   }
 
   return (
-    <SafeAreaView>
-      <Header navigation={navigation} />
-      <ScrollView style={styles.container} dataSet={{ media: styles.container }}>
+    <SafeAreaView style={styles.container}>
+      <ScrollView style={styles.childContainer}>
         <Search />
         {users.map((user, index) => (
           <ListItem key={index} user={user} navigation={navigation} />
@@ -44,88 +45,15 @@ const ChatTabScreen = () => {
   )
 }
 
-const Header = ({ navigation }) => {
-  const [visible, setVisible] = useState(false)
-  const [email, setEmail] = useState('')
-
-  const toggleOverlay = () => {
-    setVisible(!visible)
-  }
-
-  const addFriend = (email) => {
-    console.log(email)
-  }
-
-  return (
-    <View style={styles.headerWrapper} dataSet={{ media: styles.headerWrapper }}>
-      <View
-        style={[
-          styles.container,
-          {
-            flexDirection: 'row',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-          },
-        ]}
-        dataSet={{ media: styles.container }}
-      >
-        <View
-          style={{
-            flexDirection: 'row',
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}
-        >
-          <TouchableOpacity onPress={() => navigation.goBack()}>
-            <Icon name="rowing" size={24} color="gray" />
-          </TouchableOpacity>
-
-          <Text style={{ fontWeight: "500", marginLeft: 20 }} h4>
-            Messaging
-          </Text>
-        </View>
-
-        <View style={styles.flexify}>
-          <TouchableOpacity style={{ marginRight: 40 }}>
-            <Icon name="rowing" size={24} color="gray" />
-          </TouchableOpacity>
-
-          <TouchableOpacity onPress={toggleOverlay}>
-            <Icon name="edit" size={24} color="gray" />
-          </TouchableOpacity>
-        </View>
-      </View>
-
-      <Overlay isVisible={visible} onBackdropPress={toggleOverlay}>
-        <View
-          style={[styles.flexify, { marginHorizontal: 5, marginTop: 10 }]}
-          dataSet={{ media: styles.flexify }}
-        >
-          <Input
-            placeholder="Add user by email..."
-            leftIcon={<Icon name="user" size={18} color="gray" />}
-            autoCapitalize="none"
-            keyboardType="email-address"
-            textContentType="emailAddress"
-            onChangeText={(text) => setEmail(text)}
-            onSubmitEditing={() => addFriend(email)}
-            value={email}
-          />
-        </View>
-      </Overlay>
-    </View>
-  )
-}
-
 const Search = () => (
   <View
     style={[styles.flexify, { marginHorizontal: 5, marginTop: 10 }]}
-    dataSet={{ media: styles.flexify }}
   >
     <Input
       placeholder="Search messages"
       leftIcon={<Icon name="search" size={24} color="gray" />}
       inputContainerStyle={{ borderBottomWidth: 0 }}
+      // onChangeText={}
     />
 
     <Icon name="rowing" size={24} color="gray" />
@@ -135,17 +63,16 @@ const Search = () => (
 const ListItem = ({ navigation, user }) => (
   <TouchableOpacity
     style={[styles.flexify, styles.bordered]}
-    dataSet={{ media: styles.flexify }}
     onPress={() =>
-      navigation.navigate('ChatRoomScreen', {
+      navigation.navigate('Chatroom', {
         id: user.uid,
         name: user.name,
         avatar: user.avatar,
       })
     }
   >
-    <View style={styles.flexify} dataSet={{ media: styles.flexify }}>
-      <Avatar rounded source={{ uri: user.avatar }} />
+    <View style={styles.flexify}>
+      <Avatar rounded source={{ uri: '../../assets/minami.jpg' }} />
       <View style={{ marginLeft: 10 }}>
         <Text h4 style={{ fontWeight: "600" }}>
           {user.name}
@@ -159,6 +86,10 @@ const ListItem = ({ navigation, user }) => (
 );
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#f5f5f5'
+  },
   headerWrapper: {
     shadowColor: '#171717',
     shadowOffset:{
@@ -170,10 +101,10 @@ const styles = StyleSheet.create({
     paddingVertical: 15,
     backgroundColor: 'white',
   },
-  container: {
+  childContainer: {
+    paddingTop: StatusBar.currentHeight,
     paddingHorizontal: 20,
-    height: '100%',
-    width: '75%',
+    width: '90%',
     marginVertical: 0,
     marginHorizontal: 'auto',
   },

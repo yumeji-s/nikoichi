@@ -6,4 +6,4 @@ const images = {
     yui: require('./yui.jpg'),
 };
 
-export default images;
+export { images };
