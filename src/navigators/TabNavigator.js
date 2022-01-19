@@ -1,5 +1,5 @@
 import React from 'react'
-import { MaterialCommunityIcons } from '@expo/vector-icons'
+import Ionicons from 'react-native-vector-icons/Ionicons';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
 import { createStackNavigator } from '@react-navigation/stack'
 
@@ -32,7 +32,7 @@ const ChatStackNavigator = () => (
       name="Main"
       component={ChatTabScreen}
       options={{
-        headerTitle: 'チャット',
+        headerTitle: 'やりとり',
         headerBackTitleVisible: false,
         headerTitleAlign: 'center',
         // headerShown: false,
@@ -93,16 +93,16 @@ const TabNavigator = () => (
     screenOptions={({ route }) => ({
       tabBarIcon: ({ focused, color, size }) => {
         if (route.name === 'HomeTab') {
-          return <MaterialCommunityIcons name="home" size={24} />
+          return <Ionicons name="home" size={24} />
         }
         else if (route.name === 'UserTab') {
-          return <MaterialCommunityIcons name="account" size={24} />
+          return <Ionicons name="ios-compass-outline" size={24} />
         }
         else if (route.name === 'AppTab') {
-          return <MaterialCommunityIcons name="fridge-top" size={24} />
+          return <Ionicons name="person-circle-outline" size={24} />
         }
         else if (route.name === 'ChatTab') {
-          return <MaterialCommunityIcons name="chat" size={24} />
+          return <Ionicons name="chatbubble-ellipses-outline" size={24} />
         }
       },
       "headerShown": false,
@@ -117,8 +117,8 @@ const TabNavigator = () => (
   >
     <ParentTab.Screen name="HomeTab" component={HomeStackNavigator} />
     <ParentTab.Screen name="UserTab" component={SearchStackNavigator} />
-    <ParentTab.Screen name="AppTab" component={AppFirstStackNavigator} />
     <ParentTab.Screen name="ChatTab" component={ChatStackNavigator} />
+    <ParentTab.Screen name="AppTab" component={AppFirstStackNavigator} />
   </ParentTab.Navigator>
 )
 

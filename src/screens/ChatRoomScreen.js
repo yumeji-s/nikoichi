@@ -4,18 +4,10 @@ import { Overlay } from 'react-native-elements';
 import { GiftedChat } from 'react-native-gifted-chat';
 import 'dayjs/locale/ja';
 import { useNavigation } from '@react-navigation/native';
-import Icon from 'react-native-vector-icons/FontAwesome';
+import Ionicons from 'react-native-vector-icons/Ionicons';
 
 import { images } from '../../assets/index';
 import { renderInputToolbar, renderActions, renderComposer, renderSend } from '../components/InputToolbar';
-import {
-    renderAvatar,
-    renderBubble,
-    renderSystemMessage,
-    renderMessage,
-    renderMessageText,
-    renderCustomView,
-  } from '../components/MessageContainer';
 
 const ChatRoomScreen = () => {
     const navigation = useNavigation();
@@ -47,7 +39,7 @@ const ChatRoomScreen = () => {
                 messages={messages}
                 onSend={(messages) => onSend(messages)}
                 user={{
-                    _id: 1,
+                    _id: id,
                     name: 'you',
                     avater: 'https://placeimg.com/140/140/any'
                 }}
@@ -71,14 +63,6 @@ const ChatRoomScreen = () => {
                 renderActions={renderActions}
                 renderComposer={renderComposer}
                 renderSend={renderSend}
-                renderAvatar={renderAvatar}
-                renderBubble={renderBubble}
-                renderSystemMessage={renderSystemMessage}
-                renderMessage={renderMessage}
-                renderMessageText={renderMessageText}
-                // renderMessageImage
-                renderCustomView={renderCustomView}
-                isCustomViewBottom
                 messagesContainerStyle={{ backgroundColor: '#eee8aa' }}
                 parsePatterns={(linkStyle) => [
                     {
@@ -122,7 +106,7 @@ const Header = ({ navigation }) => {
             }}
           >
             <TouchableOpacity onPress={() => navigation.goBack()}>
-              <Icon name="back" />
+              <Ionicons name="arrow-back" />
             </TouchableOpacity>
   
             <Text style={{ fontWeight: "normal", marginLeft: 20 }} h4>

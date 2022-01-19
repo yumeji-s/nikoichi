@@ -1,6 +1,7 @@
 import React from 'react';
 import { Image } from 'react-native';
 import { InputToolbar, Actions, Composer, Send } from 'react-native-gifted-chat';
+import Ionicons from 'react-native-vector-icons/Ionicons';
 
 export const renderInputToolbar = (props) => (
   <InputToolbar
@@ -26,12 +27,7 @@ export const renderActions = (props) => (
       marginBottom: 0,
     }}
     icon={() => (
-      <Image
-        style={{ width: 32, height: 32 }}
-        source={{
-          uri: 'https://placeimg.com/32/32/any',
-        }}
-      />
+      <Ionicons name="md-document" size={32} style={{ width: 32, height: 32 }}/>
     )}
     options={{
       'Choose From Library': () => {
@@ -73,11 +69,6 @@ export const renderSend = (props) => (
       marginHorizontal: 4,
     }}
   >
-    <Image
-      style={{ width: 32, height: 32 }}
-      source={{
-        uri: 'https://placeimg.com/32/32/any',
-      }}
-    />
+  <Ionicons name="send" size={32} style={{ width: 32, height: 32 }}/>
   </Send>
 );
