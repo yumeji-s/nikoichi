@@ -7,12 +7,14 @@ import {
   KeyboardAvoidingView,
 } from 'react-native';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { useNavigation } from '@react-navigation/native';
 
 import { auth } from '../../firebase';
 
 const RegisterScreen = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const navigation = useNavigation();
 
     const handleRegister = async () => {
         try {
@@ -73,6 +75,13 @@ const RegisterScreen = () => {
           // disabled={!email || !password}
         >
           <Text style={{ color: 'white' }}>登録する</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={{ marginTop: 10 }}
+          onPress={() => navigation.navigate('Login')}
+        >
+        <Text>ログインはこちら</Text>
         </TouchableOpacity>
       </KeyboardAvoidingView>
     );

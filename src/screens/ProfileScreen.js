@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from 'react';
-import { View, TextInput, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
 import { Button, NativeBaseProvider } from 'native-base'; 
 import { useNavigation } from '@react-navigation/native';
 import { signOut } from 'firebase/auth';
@@ -9,7 +9,8 @@ import { auth } from '../../firebase';
 const ProfileScreen = () => {
   
   const navigation = useNavigation();
-  const [text, setText] = useState('');
+  const [userName, setUserName] = useState('');
+
 
   const handleLogout = () => {
     signOut(auth)
@@ -25,9 +26,9 @@ const ProfileScreen = () => {
     <NativeBaseProvider>
       <View style={styles.root}>
         <View style={styles.actionBar}>
+          <Text>{auth.currentUser.uid}</Text>
           <Button style={styles.button} onPress={handleLogout}>ログアウト</Button>
         </View>
-        <TextInput style={styles.input} multiline={true} onChangeText={value => setText(value)}/> 
       </View>
     </NativeBaseProvider>
   );

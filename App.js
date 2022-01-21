@@ -38,9 +38,21 @@ const App = () => {
         <TabNavigator/>
         ) : ( 
         <>
-          <Stack.Navigator>
-            <Stack.Screen name="Login" component={LoginScreen}/>
-            <Stack.Screen name="Register" component={RegisterScreen}/>
+          <Stack.Navigator  initialRouteName="Main">
+            <Stack.Screen 
+              name="Login" 
+              component={LoginScreen}
+              options={{
+                headerShown: false,
+              }}
+            />
+            <Stack.Screen 
+              name="Register"
+              component={RegisterScreen}
+              options={{
+                headerShown: false,
+              }}
+            />
           </Stack.Navigator>
         </>
         )

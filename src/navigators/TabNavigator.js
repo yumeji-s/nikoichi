@@ -92,7 +92,7 @@ const ProfileNavigator = () => (
       name="Main"
       component={ProfileScreen}
       options={{
-        headerTitle: 'メイン',
+        headerTitle: 'プロフィール',
         headerBackTitleVisible: false,
         headerTitleAlign: 'center',
       }}
