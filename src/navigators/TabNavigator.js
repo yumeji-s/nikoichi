@@ -1,20 +1,44 @@
-import React from 'react'
-import Ionicons from 'react-native-vector-icons/Ionicons';
+import React, { useEffect, useState } from 'react'
+import Ionicons from 'react-native-vector-icons/Ionicons'
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
 import { createStackNavigator } from '@react-navigation/stack'
+import { onAuthStateChanged } from 'firebase/auth'
 
-import { HomeScreen } from '../screens/HomeScreen'
-import { SearchTabScreen } from '../screens/SearchTabScreen'
-import { SwipeScreen } from '../screens/SwipeScreen'
 import { ChatRoomScreen } from '../screens/ChatRoomScreen'
 import { ChatTabScreen } from '../screens/ChatTabScreen'
+import { ProfileScreen } from '../screens/ProfileScreen'
+import { SearchTabScreen } from '../screens/SearchTabScreen'
+import { SwipeScreen } from '../screens/SwipeScreen'
+import { auth } from '../../firebase'
 
 const Stack = createStackNavigator()
+const userInfo = () => {
+  const [user, setUser] = useState('')
+  const [loading, setLoading] = useState(true)
+
+  // ログイン情報の取得
+  useEffect(() => {
+    // ログイン状況の監視
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        setUser(user)
+      }else{
+        setUser('')
+      }
+      setLoading(false)
+    })
+    // 監視の解除
+    return () => unsubscribe()
+  }, []);
+  return user == '' ? false : true
+}
+
+
 
 const HomeStackNavigator = () => (
-  <Stack.Navigator initialRouteName="Main">
+  <Stack.Navigator initialRouteName="Home">
     <Stack.Screen
-      name="Main"
+      name="Home"
       component={SwipeScreen}
       options={{
         headerTitle: 'メイン',
@@ -23,7 +47,6 @@ const HomeStackNavigator = () => (
       }}
     />
   </Stack.Navigator>
-  
 )
 
 const ChatStackNavigator = () => (
@@ -48,7 +71,6 @@ const ChatStackNavigator = () => (
       }}
     />
   </Stack.Navigator>
-  
 )
 
 const SearchStackNavigator = () => (
@@ -64,11 +86,11 @@ const SearchStackNavigator = () => (
   </Stack.Navigator>
 )
 
-const AppFirstStackNavigator = () => (
+const ProfileNavigator = () => (
   <Stack.Navigator initialRouteName="Main">
     <Stack.Screen
       name="Main"
-      component={HomeScreen}
+      component={ProfileScreen}
       options={{
         headerTitle: 'メイン',
         headerBackTitleVisible: false,
@@ -95,14 +117,14 @@ const TabNavigator = () => (
         if (route.name === 'HomeTab') {
           return <Ionicons name="home" size={24} />
         }
-        else if (route.name === 'UserTab') {
+        else if (route.name === 'SearchTab') {
           return <Ionicons name="ios-compass-outline" size={24} />
-        }
-        else if (route.name === 'AppTab') {
-          return <Ionicons name="person-circle-outline" size={24} />
         }
         else if (route.name === 'ChatTab') {
           return <Ionicons name="chatbubble-ellipses-outline" size={24} />
+        }
+        else if (route.name === 'ProfTab') {
+          return <Ionicons name="person-circle-outline" size={24} />
         }
       },
       "headerShown": false,
@@ -116,10 +138,10 @@ const TabNavigator = () => (
     })}
   >
     <ParentTab.Screen name="HomeTab" component={HomeStackNavigator} />
-    <ParentTab.Screen name="UserTab" component={SearchStackNavigator} />
+    <ParentTab.Screen name="SearchTab" component={SearchStackNavigator} />
     <ParentTab.Screen name="ChatTab" component={ChatStackNavigator} />
-    <ParentTab.Screen name="AppTab" component={AppFirstStackNavigator} />
+    <ParentTab.Screen name="ProfTab" component={ProfileNavigator} />
   </ParentTab.Navigator>
 )
 
-export default TabNavigator
+export { TabNavigator }

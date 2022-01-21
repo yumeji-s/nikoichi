@@ -131,7 +131,7 @@ const styles = StyleSheet.create({
         flex: 1,
     },
     sendArea: {
-        backgroundColor: 'rgba(240, 131, 0, 0.2)',
+        backgroundColor: '#bdb76b',
     },
     sendInput: {
         borderWidth: 0.5,
@@ -143,7 +143,7 @@ const styles = StyleSheet.create({
     },
     sendButton: {
         backgroundColor: '#F08300',
-        color: '#FFF',
+        color: '#000',
         padding: 10,
         borderRadius: 10,
         margin: 5,
