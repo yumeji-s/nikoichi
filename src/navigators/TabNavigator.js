@@ -9,12 +9,15 @@ import { ChatTabScreen } from '../screens/ChatTabScreen'
 import { ProfileScreen } from '../screens/ProfileScreen'
 import { SearchTabScreen } from '../screens/SearchTabScreen'
 import { SwipeScreen } from '../screens/SwipeScreen'
+import { LoginScreen } from '../screens/LoginScreen'
+import { RegisterScreen } from '../screens/RegisterScreen'
+import { LoadingScreen } from '../screens/LoadingScreen'
 import { auth } from '../../firebase'
 
-const Stack = createStackNavigator()
 const userInfo = () => {
-  const [user, setUser] = useState('')
+  const [user, setUser] = useState(null)
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
 
   // ログイン情報の取得
   useEffect(() => {
@@ -22,18 +25,16 @@ const userInfo = () => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
         setUser(user)
-      }else{
-        setUser('')
       }
       setLoading(false)
     })
     // 監視の解除
     return () => unsubscribe()
   }, []);
-  return user == '' ? false : true
+  return [user == null ? false : true, loading]
 }
 
-
+const Stack = createStackNavigator()
 
 const HomeStackNavigator = () => (
   <Stack.Navigator initialRouteName="Home">
@@ -109,39 +110,67 @@ const ProfileNavigator = () => (
 // 親タブ
 const ParentTab = createBottomTabNavigator()
 
-const TabNavigator = () => (
-  <ParentTab.Navigator
-    initialRouteName="HomeTab"
-    screenOptions={({ route }) => ({
-      tabBarIcon: ({ focused, color, size }) => {
-        if (route.name === 'HomeTab') {
-          return <Ionicons name="home" size={24} />
-        }
-        else if (route.name === 'SearchTab') {
-          return <Ionicons name="ios-compass-outline" size={24} />
-        }
-        else if (route.name === 'ChatTab') {
-          return <Ionicons name="chatbubble-ellipses-outline" size={24} />
-        }
-        else if (route.name === 'ProfTab') {
-          return <Ionicons name="person-circle-outline" size={24} />
-        }
-      },
-      "headerShown": false,
-      "tabBarShowLabel": false,
-      "tabBarStyle": [
-        {
-          "display": "flex"
+const TabNavigator = () => {
+
+  const [user, loading] = userInfo();
+
+  if(loading){
+    return <LoadingScreen/>
+  }
+
+  if(!user){
+    return (
+        <Stack.Navigator  initialRouteName="Main">
+          <Stack.Screen 
+            name="Login" 
+            component={LoginScreen}
+            options={{
+              headerShown: false,
+            }}
+          />
+          <Stack.Screen 
+            name="Register"
+            component={RegisterScreen}
+            options={{
+              headerShown: false,
+            }}
+          />
+        </Stack.Navigator>
+      )
+  }
+
+  return (
+    <ParentTab.Navigator
+      initialRouteName="HomeTab"
+      screenOptions={({ route }) => ({
+        tabBarIcon: ({ focused, color, size }) => {
+          switch(route.name){
+            case 'HomeTab':
+              return <Ionicons name="home" size={24} />
+            case 'SearchTab':
+              return <Ionicons name="ios-compass-outline" size={24} />
+            case 'ChatTab':
+              return <Ionicons name="chatbubble-ellipses-outline" size={24} />
+            case 'ProfTab':
+              return <Ionicons name="person-circle-outline" size={24} />
+          }
         },
-        null
-      ]
-    })}
-  >
-    <ParentTab.Screen name="HomeTab" component={HomeStackNavigator} />
-    <ParentTab.Screen name="SearchTab" component={SearchStackNavigator} />
-    <ParentTab.Screen name="ChatTab" component={ChatStackNavigator} />
-    <ParentTab.Screen name="ProfTab" component={ProfileNavigator} />
-  </ParentTab.Navigator>
-)
+        "headerShown": false,
+        "tabBarShowLabel": false,
+        "tabBarStyle": [
+          {
+            "display": "flex"
+          },
+          null
+        ]
+      })}
+    >
+      <ParentTab.Screen name="HomeTab" component={HomeStackNavigator} />
+      <ParentTab.Screen name="SearchTab" component={SearchStackNavigator} />
+      <ParentTab.Screen name="ChatTab" component={ChatStackNavigator} />
+      <ParentTab.Screen name="ProfTab" component={ProfileNavigator} />
+    </ParentTab.Navigator>
+  )
+}
 
 export { TabNavigator }
