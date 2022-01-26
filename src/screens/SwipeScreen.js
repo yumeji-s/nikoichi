@@ -63,8 +63,12 @@ const Deck = ({ data }) => {
     setIndex((prevIndex) => prevIndex + 1);
   };
 
-  const onSwipeRight = () => {};
-  const onSwipeLeft = () => {};
+  const onSwipeRight = () => {
+    console.log("like");
+  };
+  const onSwipeLeft = () => {
+    console.log("dislike");
+  };
 
   const resetPosition = () => {
     Animated.spring(position, {

@@ -11,7 +11,6 @@ const ProfileScreen = () => {
   const navigation = useNavigation();
   const [userName, setUserName] = useState('');
 
-
   const handleLogout = () => {
     signOut(auth)
       .then(() => {
