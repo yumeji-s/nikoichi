@@ -25,6 +25,8 @@ const userInfo = () => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
         setUser(user)
+      }else{
+        setUser(null)
       }
       setLoading(false)
     })
@@ -100,8 +102,6 @@ const ProfileNavigator = () => (
     />
   </Stack.Navigator>
 )
-
-
 
 
 
