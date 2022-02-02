@@ -1,23 +1,20 @@
 import React, { useState, useCallback } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
-import { Button, NativeBaseProvider,Icon } from 'native-base'; 
+import { View, Text, StyleSheet, Image } from 'react-native';
+import { Button, NativeBaseProvider } from 'native-base'; 
 import { useNavigation } from '@react-navigation/native';
-import { signOut } from 'firebase/auth';
 import Constants from 'expo-constants';
 import * as ImagePicker from 'expo-image-picker';
 import * as Permissions from 'expo-permissions';
-import { ref } from "firebase/storage";
+import { signOut } from 'firebase/auth';
+import { setDoc, doc } from 'firebase/firestore';
 
-import { auth, storage } from '../../firebase';
+import { auth, firestore } from '../../firebase';
 
 const ProfileScreen = () => {
   
   const navigation = useNavigation();
   const [userName, setUserName] = useState('');
-  const [state, setState] = useState({
-    url: '../../assets/mei.jpg',
-    progress: '',
-  });
+  const [image, setImage] = useState(null);
 
   const handleLogout = () => {
     signOut(auth)
@@ -29,61 +26,30 @@ const ProfileScreen = () => {
       });
   };
 
-  const imageChoiceAndUpload = async () => {
+  const pickImage = async () => {
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      // allowsEditing: true,
+      // aspect: [4, 3],
+      quality: 1,
+    });
 
-    try {
+    console.log(result);
 
-        // CAMERA_ROLLのパーミッション確認
-        if (Constants.platform.ios) {
-            const { status } = await Permissions.askAsync(Permissions.CAMERA);
-            if (status !== 'granted') {
-                alert("利用には許可が必要です。");
-                return;
-            }
-        }
-
-        // 画像を選ぶ
-        const result = await ImagePicker.launchCameraAsync();
-        if (!result.cancelled) {
-
-            // 撮影された（ローカルの）写真を取得
-            const localUri = await fetch(result.uri);
-            // blobを取得
-            const localBlob = await localUri.blob();
-
-            // filename 実際はUIDとかユーザー固有のIDをファイル名にする感じかと
-            const filename = localUri;
-
-            // firebase storeのrefを取得
-            const storageRef = ref(storage).child(`images/${auth.currentUser.uid}/${filename}`);
-
-            // upload
-            // const putTask = await storageRef.put(localBlob);
-            // 進捗を取得したいのでawaitは使わず
-            const putTask = storageRef.put(localBlob);
-            putTask.on('state_changed', (snapshot) => {
-                let progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-                setState({
-                    url: state.url,
-                    progress: parseInt(progress) + "%",
-                });
-            }, (error) => {
-                console.log(error);
-                alert("アップロードに失敗しました。サイズが大きい可能性あり。");
-            }, () => {
-                putTask.snapshot.ref.getDownloadURL().then(downloadURL => {
-                    console.log(downloadURL);
-                    setState({
-                        progress: '',
-                        url: downloadURL,
-                    });
-                })
-            })
-        }
-    } catch (e) {
-        console.log(e.message);
-        alert("サイズが大きい可能性あり。");
+    if (!result.cancelled) {
+      setImage(result.uri);
     }
+  };
+
+
+  const updateProfile = () => {
+    const userRef = doc(firestore, `users/${auth.currentUser.uid}`);
+    setDoc(userRef, {
+      name : "",
+      birth : new Date(),
+      imgURL : "",
+    },{ capital: true }, { merge: true });
+    console.log("update");
   }
 
   return (
@@ -92,13 +58,13 @@ const ProfileScreen = () => {
         <View style={styles.actionBar}>
           <Text>{auth.currentUser.uid}</Text>
           <Button style={styles.button} onPress={handleLogout}>ログアウト</Button>
-          <Icon
-              size="large"
-              title="NI"
-              onPress={imageChoiceAndUpload}
-              source={{ uri: state.url }}
-          />
-          <Text style={{ alignSelf: 'center' }}>{state.progress}</Text>
+        </View>
+        <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+          <Button onPress={pickImage}>画像を選択</Button>
+          {image && <Image source={{ uri: image }} style={{ width: 200, height: 200 }} />}
+        </View>
+        <View>
+          <Button onPress={updateProfile}>firestore追加</Button>
         </View>
       </View>
     </NativeBaseProvider>
@@ -134,10 +100,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#f8f8f8',
     padding: 12,
   },
-  image: {
-    height: 200,
-    width: 200,
-  }
 })
 
 export {ProfileScreen};

@@ -19,7 +19,7 @@ const ChatRoomScreen = () => {
         setMessages((previousMessages) => GiftedChat.append(GiftedChat.append(previousMessages, messages),[
             {
               _id: id,
-              text: 'どこ住みですか？!',
+              text: 'すぐ会いたいです!',
               createdAt: new Date(),
               user: {
                 _id: 2,
