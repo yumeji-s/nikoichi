@@ -1,20 +1,37 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { View, Text, StyleSheet, Image } from 'react-native';
-import { Button, NativeBaseProvider } from 'native-base'; 
+import { Button, NativeBaseProvider, Avatar } from 'native-base'; 
 import { useNavigation } from '@react-navigation/native';
 import Constants from 'expo-constants';
 import * as ImagePicker from 'expo-image-picker';
 import * as Permissions from 'expo-permissions';
 import { signOut } from 'firebase/auth';
-import { setDoc, doc } from 'firebase/firestore';
+import { doc, setDoc, getDoc, updateDoc } from 'firebase/firestore';
+import { ref, uploadBytes, getBlob, getDownloadURL } from 'firebase/storage';
 
-import { auth, firestore } from '../../firebase';
+import { auth, firestore, storage } from '../../firebase';
 
 const ProfileScreen = () => {
   
   const navigation = useNavigation();
   const [userName, setUserName] = useState('');
+  const [icon, setIcon] = useState(null);
   const [image, setImage] = useState(null);
+  const [update,setUpdata]=useState<boolean>(false)
+
+  useEffect(async () => {
+    // 初回レンダリング時にアイコンを取得
+    const userRef = doc(firestore, `users/${auth.currentUser.uid}`);
+    const snapShot = await getDoc(userRef);
+    if(snapShot.data().imgURL != ""){
+      const iconUrl = await getDownloadURL(ref(storage, `images/${auth.currentUser.uid}/icon`));
+      console.log(iconUrl);
+      setIcon(iconUrl);
+    }else{
+      setIcon(null);
+    }
+    setUpdata(update?false:true)
+  },[]);
 
   const handleLogout = () => {
     signOut(auth)
@@ -52,6 +69,26 @@ const ProfileScreen = () => {
     console.log("update");
   }
 
+  const updateIcon = async () => {
+    if(!image){
+      return;
+    }
+    const iconRef = ref(storage, `images/${auth.currentUser.uid}/icon`);
+    const localUri = await fetch(image);
+    const localBlob = await localUri.blob();
+
+    const metadata = {
+      name : 'icon',
+    };
+
+    uploadBytes(iconRef, localBlob, metadata).then((snapshot) => {
+      const userIconRef = doc(firestore, `users/${auth.currentUser.uid}`);
+      updateDoc(userIconRef, {
+        imgURL : snapshot.metadata.fullPath,
+      }, { capital: true });
+    });
+  }
+
   return (
     <NativeBaseProvider>
       <View style={styles.root}>
@@ -59,11 +96,15 @@ const ProfileScreen = () => {
           <Text>{auth.currentUser.uid}</Text>
           <Button style={styles.button} onPress={handleLogout}>ログアウト</Button>
         </View>
+        <View>
+          <Avatar bg="indigo.500" alignSelf="center" size={"2xl"} source={{ uri: icon }} />
+        </View>
         <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
           <Button onPress={pickImage}>画像を選択</Button>
           {image && <Image source={{ uri: image }} style={{ width: 200, height: 200 }} />}
         </View>
         <View>
+          <Button onPress={updateIcon}>storageに追加</Button>
           <Button onPress={updateProfile}>firestore追加</Button>
         </View>
       </View>
