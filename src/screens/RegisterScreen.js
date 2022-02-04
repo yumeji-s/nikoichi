@@ -7,9 +7,10 @@ import {
   KeyboardAvoidingView,
 } from 'react-native';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { doc, setDoc } from 'firebase/firestore';
 import { useNavigation } from '@react-navigation/native';
 
-import { auth } from '../../firebase';
+import { auth, firestore } from '../../firebase';
 
 const RegisterScreen = () => {
     const [email, setEmail] = useState('');
@@ -19,6 +20,13 @@ const RegisterScreen = () => {
     const handleRegister = async () => {
         try {
           const user = await createUserWithEmailAndPassword(auth, email, password);
+          const userRef = doc(firestore, `users/${auth.currentUser.uid}`);
+          await setDoc(userRef, {
+            name : "",
+            birth : new Date(),
+            imgURL : "",
+          });
+          console.log("アカウント作成");
         } catch (error) {
           console.log(error.message);
         }

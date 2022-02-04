@@ -4,10 +4,9 @@ import { Button, NativeBaseProvider, Avatar } from 'native-base';
 import { useNavigation } from '@react-navigation/native';
 import Constants from 'expo-constants';
 import * as ImagePicker from 'expo-image-picker';
-import * as Permissions from 'expo-permissions';
 import { signOut } from 'firebase/auth';
 import { doc, setDoc, getDoc, updateDoc } from 'firebase/firestore';
-import { ref, uploadBytes, getBlob, getDownloadURL } from 'firebase/storage';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 
 import { auth, firestore, storage } from '../../firebase';
 
@@ -17,10 +16,9 @@ const ProfileScreen = () => {
   const [userName, setUserName] = useState('');
   const [icon, setIcon] = useState(null);
   const [image, setImage] = useState(null);
-  const [update,setUpdata]=useState<boolean>(false)
 
   useEffect(async () => {
-    // 初回レンダリング時にアイコンを取得
+    // iconが更新されるごとにアイコンを取得
     const userRef = doc(firestore, `users/${auth.currentUser.uid}`);
     const snapShot = await getDoc(userRef);
     if(snapShot.data().imgURL != ""){
@@ -30,8 +28,7 @@ const ProfileScreen = () => {
     }else{
       setIcon(null);
     }
-    setUpdata(update?false:true)
-  },[]);
+  },[icon]);
 
   const handleLogout = () => {
     signOut(auth)
@@ -86,6 +83,8 @@ const ProfileScreen = () => {
       updateDoc(userIconRef, {
         imgURL : snapshot.metadata.fullPath,
       }, { capital: true });
+      setIcon(null);
+      // setIcon(getDownloadURL(ref(storage, `images/${auth.currentUser.uid}/icon`)));
     });
   }
 
@@ -97,14 +96,15 @@ const ProfileScreen = () => {
           <Button style={styles.button} onPress={handleLogout}>ログアウト</Button>
         </View>
         <View>
-          <Avatar bg="indigo.500" alignSelf="center" size={"2xl"} source={{ uri: icon }} />
+          {image && <Avatar bg="indigo.500" alignSelf="center" size={"2xl"} source={{ uri: image }} />}
+          {!image && <Avatar bg="indigo.500" alignSelf="center" size={"2xl"} source={{ uri: image }} />}
         </View>
         <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
           <Button onPress={pickImage}>画像を選択</Button>
           {image && <Image source={{ uri: image }} style={{ width: 200, height: 200 }} />}
         </View>
         <View>
-          <Button onPress={updateIcon}>storageに追加</Button>
+          <Button onPress={updateIcon}>icon更新</Button>
           <Button onPress={updateProfile}>firestore追加</Button>
         </View>
       </View>
