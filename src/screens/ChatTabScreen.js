@@ -13,7 +13,6 @@ import { useNavigation } from '@react-navigation/native';
 import { MaterialIcons  } from '@expo/vector-icons';
 
 import { images } from '../../assets/index';
-import { firestore, storage } from '../../firebase';
 
 const ChatTabScreen = () => {
   const navigation = useNavigation();
@@ -78,9 +77,11 @@ const ListItem = ({ navigation, user }) => (
         <Text h4 style={{ fontWeight: "600" }}>
           {user.name}
         </Text>
+        {/* <Text>Nice to meet you too!</Text> */}
       </View>
     </View>
 
+    {/* <Text>Nov 12</Text> */}
   </TouchableOpacity>
 );
 
