@@ -13,6 +13,7 @@ import { useNavigation } from '@react-navigation/native';
 import { auth, firestore } from '../../firebase';
 
 const RegisterScreen = () => {
+    const [name, setName] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const navigation = useNavigation();
@@ -22,9 +23,11 @@ const RegisterScreen = () => {
           const user = await createUserWithEmailAndPassword(auth, email, password);
           const userRef = doc(firestore, `users/${auth.currentUser.uid}`);
           await setDoc(userRef, {
-            name : "",
+            name : name,
             birth : new Date(),
             imgURL : "",
+            uid : auth.currentUser.uid,
+            introduction : "",
           });
           console.log("アカウント作成");
         } catch (error) {
@@ -42,6 +45,21 @@ const RegisterScreen = () => {
         }}
       >
         <Text style={{ fontSize: 20, marginBottom: 20 }}>ユーザ登録画面</Text>
+        <View style={{ marginBottom: 20 }}>
+          <TextInput
+            style={{
+              width: 250,
+              borderWidth: 1,
+              padding: 5,
+              borderColor: 'gray',
+            }}
+            onChangeText={setName}
+            value={name}
+            placeholder="ユーザ名を入力してください"
+            autoCapitalize="none"
+            autoCorrect={false}
+          />
+        </View>
         <View style={{ marginBottom: 20 }}>
           <TextInput
             style={{

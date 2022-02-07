@@ -1,5 +1,5 @@
 //import Deck from '../components/SwipeCard';
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import {
   View,
   StyleSheet,
@@ -12,13 +12,18 @@ import {
   Platform,
 } from 'react-native';
 import { Card, Button } from 'react-native-elements';
+import { doc, setDoc, getDoc, getDocs, updateDoc, collection } from 'firebase/firestore';
+import { ref, getDownloadURL } from 'firebase/storage';
 
 import { images } from '../../assets/index';
+import { auth, firestore, storage } from '../../firebase';
+import { LoadingScreen } from './LoadingScreen';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 const SCREEN_HEIGHT = Dimensions.get('window').height;
 const SWIPE_THRESHOLD = 0.25 * SCREEN_WIDTH;
 const SWIPE_OUT_DURATION = 250;
+const IMAGE_HEIGHT = SCREEN_HEIGHT / 2;
 
 const Deck = ({ data }) => {
   UIManager.setLayoutAnimationEnabledExperimental &&
@@ -60,14 +65,7 @@ const Deck = ({ data }) => {
 
     direction === 'right' ? onSwipeRight() : onSwipeLeft();
     position.setValue({ x: 0, y: 0 });
-    setIndex((prevIndex) => prevIndex + 1);
-  };
-
-  const onSwipeRight = () => {
-    console.log("like");
-  };
-  const onSwipeLeft = () => {
-    console.log("dislike");
+    setIndex(prevIndex => prevIndex + 1);
   };
 
   const resetPosition = () => {
@@ -82,6 +80,20 @@ const Deck = ({ data }) => {
     outputRange: ['-120deg', '0deg', '120deg'],
   });
 
+  const onSwipeRight = () => {
+    const item = data[index];
+    console.log("like " + item.uid);
+    const requestRef = doc(firestore, `request/${item.uid}`);
+    setDoc(requestRef, {
+      [auth.currentUser.uid] : true,
+    },{ capital: true }, { merge: true });
+  };
+
+  const onSwipeLeft = () => {
+    console.log("dislike");
+    // 嫌いの時
+  };
+
   return (
     <>
       {index >= data.length && <RenderNoMoreCards />}
@@ -94,7 +106,7 @@ const Deck = ({ data }) => {
           if (i === index) {
             return (
               <Animated.View
-                key={item.id}
+                key={item.uid}
                 style={[
                   {
                     ...position.getLayout(),
@@ -113,7 +125,7 @@ const Deck = ({ data }) => {
 
           return (
             <Animated.View
-              key={item.id}
+              key={item.uid}
               style={[styles.cardStyle, { top: 10 * (i - index) }]}
             >
               <RenderCards item={item} />
@@ -127,12 +139,16 @@ const Deck = ({ data }) => {
 
 const RenderCards = ({ item }) => {
   return (
-    <Card key={item.id}>
+    <Card key={item.uid}>
       <Card.Title style={styles.titleStyle}>{item.name}</Card.Title>
       <Card.Divider />
-      <Card.Image source={item.uri} style={styles.imageStyle} resizeMode='contain'/>
+        {
+          item.uri ? 
+            <Card.Image source={{ uri: item.uri }} style={styles.imageStyle} resizeMode='contain'/> :
+            <Card.Image source={require('../../assets/defaultUserIcon.png')} style={styles.imageStyle} resizeMode='stretch'/>
+        }
       <Card.Divider />
-      <Text style={styles.textStyle}>目標：{item.goal}</Text>
+      <Text style={styles.textStyle}>{item.introduction}</Text>
       <Button buttonStyle={styles.buttonStyle} title="プロフィールはこちら" onPress={() => {console.info(`name: ${item.name}`)}} />
     </Card>
   );
@@ -151,47 +167,39 @@ const RenderNoMoreCards = () => {
 
 const SwipeScreen = () => {
 
-    const DATA = [
-        {
-          id: 1,
-          name: '浜辺　美波',
-          uri: images.minami,
-          goal: '若手No.1女優',
-        },
-        {
-          id: 2,
-          name: '新垣　結衣',
-          uri: images.yui,
-          goal: '若手No.2女優',
-        },
-        {
-          id: 3,
-          name: '広瀬　すず',
-          uri: images.suzu,
-          goal: '若手No.3女優',
-        },
-        {
-          id: 4,
-          name: '永野　芽郁',
-          uri: images.mei,
-          goal: '若手No.4女優',
-        },
-        {
-          id: 5,
-          name: '今田　美桜',
-          uri: images.mio,
-          goal: '若手No.5女優',
-        },
-      ];
+  const [data, setData] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-    return (
-      <View style={styles.container}>
-        <Deck data={DATA} />
-      </View>
-    );
+  useEffect(async () => {
+    // iconが更新されるごとにアイコンを取得
+    const usersRef = collection(firestore, `users/`);
+    const usersSnap = await getDocs(usersRef);
+
+    let users = [];
+    usersSnap.docs.forEach(async (doc) => {
+      if(doc.data().uid != auth.currentUser.uid){
+        users.push(
+          {
+            ...doc.data(),
+            uri : doc.data().imgURL == '' ? null : doc.data().imgURL,
+          }
+        );
+      }
+    });
+    setData(users);
+    setLoading(false);
+  },[]);
+
+  if(loading){
+    return <LoadingScreen />;
+  }
+
+  return (
+    <View style={styles.container}>
+      <Deck data={data} />
+    </View>
+  );
 }
-
-const IMAGE_HEIGHT = SCREEN_HEIGHT / 2;
 
 const styles = StyleSheet.create({
     container: {
@@ -210,8 +218,13 @@ const styles = StyleSheet.create({
       height: IMAGE_HEIGHT,
       width: SCREEN_WIDTH,
     },
-    titleStyle: { fontSize: 18 },
-    textStyle: { marginBottom: 10, fontSize: 16 },
+    titleStyle: {
+      fontSize: 18
+    },
+    textStyle: {
+      marginBottom: 10,
+      fontSize: 16
+    },
     buttonStyle: {
       borderRadius: 50,
       marginLeft: 0,

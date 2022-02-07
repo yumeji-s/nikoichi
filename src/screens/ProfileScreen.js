@@ -78,13 +78,13 @@ const ProfileScreen = () => {
       name : 'icon',
     };
 
-    uploadBytes(iconRef, localBlob, metadata).then((snapshot) => {
+    uploadBytes(iconRef, localBlob, metadata).then(async (snapshot) => {
       const userIconRef = doc(firestore, `users/${auth.currentUser.uid}`);
+      const imgUrl = await getDownloadURL(ref(storage, `images/${auth.currentUser.uid}/icon`));
       updateDoc(userIconRef, {
-        imgURL : snapshot.metadata.fullPath,
+        imgURL : imgUrl,
       }, { capital: true });
       setIcon(null);
-      // setIcon(getDownloadURL(ref(storage, `images/${auth.currentUser.uid}/icon`)));
     });
   }
 
@@ -96,8 +96,8 @@ const ProfileScreen = () => {
           <Button style={styles.button} onPress={handleLogout}>ログアウト</Button>
         </View>
         <View>
-          {image && <Avatar bg="indigo.500" alignSelf="center" size={"2xl"} source={{ uri: image }} />}
-          {!image && <Avatar bg="indigo.500" alignSelf="center" size={"2xl"} source={{ uri: image }} />}
+          {icon && <Avatar bg="indigo.500" alignSelf="center" size={"2xl"} source={{ uri: icon }} />}
+          {!icon && <Avatar bg="indigo.500" alignSelf="center" size={"2xl"} source={{ uri: icon }} />}
         </View>
         <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
           <Button onPress={pickImage}>画像を選択</Button>
