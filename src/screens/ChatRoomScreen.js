@@ -6,7 +6,6 @@ import 'dayjs/locale/ja';
 import { useNavigation } from '@react-navigation/native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 
-import { images } from '../../assets/index';
 import { renderInputToolbar, renderActions, renderComposer, renderSend } from '../components/InputToolbar';
 
 const ChatRoomScreen = () => {
@@ -24,7 +23,7 @@ const ChatRoomScreen = () => {
               user: {
                 _id: 2,
                 name: 'React Native',
-                avatar: images.minami,
+                avatar: "",
               },
             },
           ]));

@@ -13,9 +13,7 @@ import {
 } from 'react-native';
 import { Card, Button } from 'react-native-elements';
 import { doc, setDoc, getDoc, getDocs, updateDoc, collection } from 'firebase/firestore';
-import { ref, getDownloadURL } from 'firebase/storage';
 
-import { images } from '../../assets/index';
 import { auth, firestore, storage } from '../../firebase';
 import { LoadingScreen } from './LoadingScreen';
 

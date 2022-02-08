@@ -1,34 +1,41 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { View, Text, StyleSheet, Image } from 'react-native';
-import { Button, NativeBaseProvider, Avatar } from 'native-base'; 
+import { Avatar } from 'react-native-elements';
+import { Button, NativeBaseProvider } from 'native-base'; 
 import { useNavigation } from '@react-navigation/native';
 import Constants from 'expo-constants';
 import * as ImagePicker from 'expo-image-picker';
+import * as Permissions from 'expo-permissions';
 import { signOut } from 'firebase/auth';
 import { doc, setDoc, getDoc, updateDoc } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 
 import { auth, firestore, storage } from '../../firebase';
+import { LoadingScreen } from './LoadingScreen';
 
 const ProfileScreen = () => {
   
   const navigation = useNavigation();
-  const [userName, setUserName] = useState('');
+  const [user, setUser] = useState();
   const [icon, setIcon] = useState(null);
-  const [image, setImage] = useState(null);
+  const [iconLocked, setIconLocked] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   useEffect(async () => {
-    // iconが更新されるごとにアイコンを取得
+    // 最初のレンダリング時にアイコンなどを取得
     const userRef = doc(firestore, `users/${auth.currentUser.uid}`);
     const snapShot = await getDoc(userRef);
-    if(snapShot.data().imgURL != ""){
-      const iconUrl = await getDownloadURL(ref(storage, `images/${auth.currentUser.uid}/icon`));
-      console.log(iconUrl);
-      setIcon(iconUrl);
-    }else{
-      setIcon(null);
+    if(snapShot.data().imgURL != ''){
+      setIcon(snapShot.data().imgURL);
     }
-  },[icon]);
+    setUser({
+      name: snapShot.data().name,
+      imgURL: snapShot.data().imgURL,
+    });
+    setLoading(false);
+  },[]);
+
+  const unLock = useCallback(() => setIconLocked(false), []);
 
   const handleLogout = () => {
     signOut(auth)
@@ -41,6 +48,18 @@ const ProfileScreen = () => {
   };
 
   const pickImage = async () => {
+
+    if(iconLocked){
+      return;
+    }
+
+    if (Constants.platform.ios) {
+      const { status } = await Permissions.askAsync(Permissions.CAMERA);
+      if (status !== 'granted') {
+          alert("利用には許可が必要です。");
+          return;
+      }
+    }
     let result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       // allowsEditing: true,
@@ -51,27 +70,14 @@ const ProfileScreen = () => {
     console.log(result);
 
     if (!result.cancelled) {
-      setImage(result.uri);
+      updateIcon(result.uri);
     }
   };
 
+  const updateIcon = async (url) => {
 
-  const updateProfile = () => {
-    const userRef = doc(firestore, `users/${auth.currentUser.uid}`);
-    setDoc(userRef, {
-      name : "",
-      birth : new Date(),
-      imgURL : "",
-    },{ capital: true }, { merge: true });
-    console.log("update");
-  }
-
-  const updateIcon = async () => {
-    if(!image){
-      return;
-    }
     const iconRef = ref(storage, `images/${auth.currentUser.uid}/icon`);
-    const localUri = await fetch(image);
+    const localUri = await fetch(url);
     const localBlob = await localUri.blob();
 
     const metadata = {
@@ -84,8 +90,22 @@ const ProfileScreen = () => {
       updateDoc(userIconRef, {
         imgURL : imgUrl,
       }, { capital: true });
-      setIcon(null);
+      setIcon(url);
+      setIconLocked(true);
+      setTimeout(unLock, 300000); // 五分間アイコンを変更不可に
     });
+  };
+
+  const updateProfile = () => {
+    const userRef = doc(firestore, `users/${auth.currentUser.uid}`);
+    updateDoc(userRef, {
+      birth : new Date(),
+    },{ capital: true });
+    console.log("update");
+  };
+
+  if(loading){
+    return <LoadingScreen />;
   }
 
   return (
@@ -95,17 +115,9 @@ const ProfileScreen = () => {
           <Text>{auth.currentUser.uid}</Text>
           <Button style={styles.button} onPress={handleLogout}>ログアウト</Button>
         </View>
-        <View>
-          {icon && <Avatar bg="indigo.500" alignSelf="center" size={"2xl"} source={{ uri: icon }} />}
-          {!icon && <Avatar bg="indigo.500" alignSelf="center" size={"2xl"} source={{ uri: icon }} />}
-        </View>
-        <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-          <Button onPress={pickImage}>画像を選択</Button>
-          {image && <Image source={{ uri: image }} style={{ width: 200, height: 200 }} />}
-        </View>
-        <View>
-          <Button onPress={updateIcon}>icon更新</Button>
-          <Button onPress={updateProfile}>firestore追加</Button>
+        <View alignSelf="center">
+          {icon && <Avatar rounded size="xlarge" title={user.name} source={{ uri : icon }} onPress={pickImage}  activeOpacity={0.7}><Avatar.Accessory size={50} /></Avatar>}
+          {/* {!icon && <Avatar icon={{name: 'user', type: 'font-awesome'}} source={{ uri : icon }} key={icon} />} */}
         </View>
       </View>
     </NativeBaseProvider>

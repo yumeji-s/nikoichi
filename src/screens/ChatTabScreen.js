@@ -12,7 +12,6 @@ import { Avatar, Input, Overlay, Icon } from 'react-native-elements';
 import { useNavigation } from '@react-navigation/native';
 import { MaterialIcons  } from '@expo/vector-icons';
 
-import { images } from '../../assets/index';
 
 const ChatTabScreen = () => {
   const navigation = useNavigation();
@@ -24,11 +23,11 @@ const ChatTabScreen = () => {
     const userList = [{
       uid: 1,
       name: "浜辺　美波",
-      avatar: images.minami,
+      avatar: "",
     },{
       uid: 2,
       name: "今田　美桜",
-      avatar: images.mio,
+      avatar: "",
     }]
     setUsers(userList);
   }
