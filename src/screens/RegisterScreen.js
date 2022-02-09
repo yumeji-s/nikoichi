@@ -29,6 +29,10 @@ const RegisterScreen = () => {
             uid : auth.currentUser.uid,
             introduction : "",
           });
+          const requestRef = doc(firestore, `request/${auth.currentUser.uid}`);
+          await setDoc(requestRef, {
+            [auth.currentUser.uid] : false,
+          });
           console.log("アカウント作成");
         } catch (error) {
           console.log(error.message);
@@ -97,7 +101,7 @@ const RegisterScreen = () => {
             borderRadius: 10,
           }}
           onPress={handleRegister}
-          // disabled={!email || !password}
+          disabled={!email || !password || !name}
         >
           <Text style={{ color: 'white' }}>登録する</Text>
         </TouchableOpacity>

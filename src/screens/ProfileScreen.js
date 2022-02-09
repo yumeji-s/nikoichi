@@ -75,7 +75,6 @@ const ProfileScreen = () => {
   };
 
   const updateIcon = async (url) => {
-
     const iconRef = ref(storage, `images/${auth.currentUser.uid}/icon`);
     const localUri = await fetch(url);
     const localBlob = await localUri.blob();

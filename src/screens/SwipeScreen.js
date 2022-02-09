@@ -57,12 +57,22 @@ const Deck = ({ data }) => {
   };
   
   const [index, setIndex] = useState(0);
+  const [swipeDirection, setSwipeDirection] = useState('');
+  
+  useEffect(() => {
+    const partner = data[index - 1];
+    console.log(`useEffect ${index} ${swipeDirection}`);
+    if(swipeDirection === 'right'){
+      onSwipeRight(partner);
+    }else if(swipeDirection === 'left'){
+      onSwipeLeft(partner);
+    }
+  },[index]);
 
   const onSwipeComplete = (direction) => {
-    const item = data[index];
-
-    direction === 'right' ? onSwipeRight() : onSwipeLeft();
+    console.log(`onSwipeComplete ${index} ${swipeDirection}`);
     position.setValue({ x: 0, y: 0 });
+    setSwipeDirection(direction);
     setIndex(prevIndex => prevIndex + 1);
   };
 
@@ -78,17 +88,16 @@ const Deck = ({ data }) => {
     outputRange: ['-120deg', '0deg', '120deg'],
   });
 
-  const onSwipeRight = () => {
-    const item = data[index];
-    console.log("like " + item.uid);
-    const requestRef = doc(firestore, `request/${item.uid}`);
-    setDoc(requestRef, {
+
+  const onSwipeRight = (partner) => {
+    const requestRef = doc(firestore, `request/${partner.uid}`);
+    updateDoc(requestRef, {
       [auth.currentUser.uid] : true,
-    },{ capital: true }, { merge: true });
+    },{ capital: true });
   };
 
-  const onSwipeLeft = () => {
-    console.log("dislike");
+  const onSwipeLeft = (partner) => {
+    console.log("dislike " + partner.uid);
     // 嫌いの時
   };
 
