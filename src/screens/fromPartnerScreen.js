@@ -12,7 +12,7 @@ import {
   Platform,
 } from 'react-native';
 import { Card, Button } from 'react-native-elements';
-import { doc, setDoc, getDoc, getDocs, updateDoc, collection } from 'firebase/firestore';
+import { doc, setDoc, getDoc, getDocs, updateDoc, collection, query, where } from 'firebase/firestore';
 
 import { auth, firestore, storage } from '../../firebase';
 import { LoadingScreen } from './LoadingScreen';
@@ -87,11 +87,23 @@ const Deck = ({ data }) => {
   });
 
 
-  const onSwipeRight = (partner) => {
-    const requestRef = doc(firestore, `request/${partner.uid}`);
-    updateDoc(requestRef, {
-      [auth.currentUser.uid] : {
-        request : true,
+  const onSwipeRight = async (partner) => {
+
+    // マッチング済みに追加
+    const matchingRef = collection(firestore, `matching/${auth.currentUser.uid}/${partner.uid}`);
+    await setDoc(doc(matchingRef, partner.uid), {
+      chatName : auth.currentUser.uid + partner.uid,
+    },{ capital: true },{ merge: true });
+    const partnerRef = collection(firestore, `matching/${partner.uid}/${auth.currentUser.uid}`);
+    await setDoc(doc(partnerRef, auth.currentUser.uid), {
+      chatName : auth.currentUser.uid + partner.uid,
+    },{ capital: true },{ merge: true });
+
+    // リクエストをfalseに
+    const requestRef = doc(firestore, `request/${auth.currentUser.uid}`);
+    await updateDoc(requestRef, {
+      [partner.uid] : {
+        request : false,
       }
     },{ capital: true });
   };
@@ -172,7 +184,7 @@ const RenderNoMoreCards = () => {
   );
 };
 
-const SwipeScreen = () => {
+const fromPartnerScreen = () => {
 
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -180,6 +192,8 @@ const SwipeScreen = () => {
   useEffect(async () => {
     // iconが更新されるごとにアイコンを取得
     const usersRef = collection(firestore, `users/`);
+    const requestRef = collection(firestore, `request/`);
+    const q = query(requestRef, where(``, "==", true));
     const usersSnap = await getDocs(usersRef);
 
     let users = [];
@@ -241,4 +255,4 @@ const styles = StyleSheet.create({
 });
 
 
-export {SwipeScreen};
+export {fromPartnerScreen};

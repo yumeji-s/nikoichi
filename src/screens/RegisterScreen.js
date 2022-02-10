@@ -29,9 +29,13 @@ const RegisterScreen = () => {
             uid : auth.currentUser.uid,
             introduction : "",
           });
+
+          // 自分がおすすめユーザに表示されないように
           const requestRef = doc(firestore, `request/${auth.currentUser.uid}`);
           await setDoc(requestRef, {
-            [auth.currentUser.uid] : false,
+            [auth.currentUser.uid] : {
+              request : false,
+            }
           });
           console.log("アカウント作成");
         } catch (error) {

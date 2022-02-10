@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import Ionicons from 'react-native-vector-icons/Ionicons'
+import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
 import { createStackNavigator } from '@react-navigation/stack'
 import { onAuthStateChanged } from 'firebase/auth'
@@ -9,6 +10,7 @@ import { ChatTabScreen } from '../screens/ChatTabScreen'
 import { ProfileScreen } from '../screens/ProfileScreen'
 import { SearchTabScreen } from '../screens/SearchTabScreen'
 import { SwipeScreen } from '../screens/SwipeScreen'
+import { fromPartnerScreen } from '../screens/fromPartnerScreen'
 import { LoginScreen } from '../screens/LoginScreen'
 import { RegisterScreen } from '../screens/RegisterScreen'
 import { LoadingScreen } from '../screens/LoadingScreen'
@@ -43,6 +45,20 @@ const HomeStackNavigator = () => (
     <Stack.Screen
       name="Home"
       component={SwipeScreen}
+      options={{
+        headerTitle: 'メイン',
+        headerBackTitleVisible: false,
+        headerShown: false,
+      }}
+    />
+  </Stack.Navigator>
+)
+
+const fromPartnerStackNavigator = () => (
+  <Stack.Navigator initialRouteName="Home">
+    <Stack.Screen
+      name="Home"
+      component={fromPartnerScreen}
       options={{
         headerTitle: 'メイン',
         headerBackTitleVisible: false,
@@ -109,6 +125,26 @@ const ProfileNavigator = () => (
 
 // 親タブ
 const ParentTab = createBottomTabNavigator()
+const userTab = createMaterialTopTabNavigator();
+
+const userTabs = () => {
+  return (
+    <userTab.Navigator
+      initialRouteName="bestUser"
+      screenOptions={({ route }) => ({
+        "tabBarStyle": [
+          {
+            "display": "flex"
+          },
+          null
+        ]
+      })}
+    >
+      <userTab.Screen name="bestUser" options={{ tabBarLabel: 'おすすめ' }} component={HomeStackNavigator} />
+      <userTab.Screen name="fromPartner" options={{ tabBarLabel: '相手から' }} component={fromPartnerStackNavigator} />
+    </userTab.Navigator>
+  );
+}
 
 const TabNavigator = () => {
 
@@ -141,11 +177,11 @@ const TabNavigator = () => {
 
   return (
     <ParentTab.Navigator
-      initialRouteName="HomeTab"
+      initialRouteName="bestUsersTab"
       screenOptions={({ route }) => ({
         tabBarIcon: ({ focused, color, size }) => {
           switch(route.name){
-            case 'HomeTab':
+            case 'bestUsersTab':
               return <Ionicons name="home" size={24} />
             case 'SearchTab':
               return <Ionicons name="ios-compass-outline" size={24} />
@@ -165,7 +201,7 @@ const TabNavigator = () => {
         ]
       })}
     >
-      <ParentTab.Screen name="HomeTab" component={HomeStackNavigator} />
+      <ParentTab.Screen name="bestUsersTab" component={userTabs} />
       <ParentTab.Screen name="SearchTab" component={SearchStackNavigator} />
       <ParentTab.Screen name="ChatTab" component={ChatStackNavigator} />
       <ParentTab.Screen name="ProfTab" component={ProfileNavigator} />
