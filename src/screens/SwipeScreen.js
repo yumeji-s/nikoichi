@@ -12,7 +12,7 @@ import {
   Platform,
 } from 'react-native';
 import { Card, Button } from 'react-native-elements';
-import { doc, setDoc, getDoc, getDocs, updateDoc, collection } from 'firebase/firestore';
+import { doc, setDoc, getDoc, getDocs, updateDoc, collection, query, where, limit } from 'firebase/firestore';
 
 import { auth, firestore, storage } from '../../firebase';
 import { LoadingScreen } from './LoadingScreen';
@@ -178,19 +178,20 @@ const SwipeScreen = () => {
   useEffect(async () => {
     // 自分、リクエストをくれた人、マッチングした人のuidを取得
     const requestRef = collection(firestore, `request/${auth.currentUser.uid}/${auth.currentUser.uid}`);
-    const q = query(requestRef, where(`request`, "==", false), limit(10));
-    const requestUsersSnap = await getDocs(q);
+    const requestUsersSnap = await getDocs(requestRef);
     let uids = [];
     requestUsersSnap.docs.forEach((doc) => {
       uids.push(doc.id);
     });
+    console.log(uids);
 
-    // iconが更新されるごとにアイコンを取得
+    // 最大30件取得して非表示ユーザ以外をセット
     const usersRef = collection(firestore, `users/`);
-    const userQuery = query(usersRef, where(`uid`, 'in', uids));
+    const userQuery = query(usersRef, limit(30));
     const usersSnap = await getDocs(userQuery);
     let users = [];
     usersSnap.docs.forEach((doc) => {
+      if(!uids.includes(doc.id))
       users.push(
         {
           ...doc.data(),
