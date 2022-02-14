@@ -88,12 +88,10 @@ const Deck = ({ data }) => {
 
 
   const onSwipeRight = (partner) => {
-    const requestRef = doc(firestore, `request/${partner.uid}`);
-    updateDoc(requestRef, {
-      [auth.currentUser.uid] : {
-        request : true,
-      }
-    },{ capital: true });
+    const requestRef = doc(firestore, `request/${partner.uid}/${partner.uid}/${auth.currentUser.uid}`);
+    setDoc(requestRef, {
+      request : true,
+    },{ capital: true }, { merge: true });
   };
 
   const onSwipeLeft = (partner) => {
@@ -178,21 +176,29 @@ const SwipeScreen = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(async () => {
+    // 自分、リクエストをくれた人、マッチングした人のuidを取得
+    const requestRef = collection(firestore, `request/${auth.currentUser.uid}/${auth.currentUser.uid}`);
+    const q = query(requestRef, where(`request`, "==", false), limit(10));
+    const requestUsersSnap = await getDocs(q);
+    let uids = [];
+    requestUsersSnap.docs.forEach((doc) => {
+      uids.push(doc.id);
+    });
+
     // iconが更新されるごとにアイコンを取得
     const usersRef = collection(firestore, `users/`);
-    const usersSnap = await getDocs(usersRef);
-
+    const userQuery = query(usersRef, where(`uid`, 'in', uids));
+    const usersSnap = await getDocs(userQuery);
     let users = [];
-    usersSnap.docs.forEach(async (doc) => {
-      if(doc.data().uid != auth.currentUser.uid){
-        users.push(
-          {
-            ...doc.data(),
-            uri : doc.data().imgURL == '' ? null : doc.data().imgURL,
-          }
-        );
-      }
+    usersSnap.docs.forEach((doc) => {
+      users.push(
+        {
+          ...doc.data(),
+          uri : doc.data().imgURL == '' ? null : doc.data().imgURL,
+        }
+      );
     });
+    
     setData(users);
     setLoading(false);
   },[]);

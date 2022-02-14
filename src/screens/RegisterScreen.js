@@ -31,11 +31,9 @@ const RegisterScreen = () => {
           });
 
           // 自分がおすすめユーザに表示されないように
-          const requestRef = doc(firestore, `request/${auth.currentUser.uid}`);
+          const requestRef = doc(firestore, `request/${auth.currentUser.uid}/${auth.currentUser.uid}/${auth.currentUser.uid}`);
           await setDoc(requestRef, {
-            [auth.currentUser.uid] : {
-              request : false,
-            }
+            request : false,
           });
           console.log("アカウント作成");
         } catch (error) {

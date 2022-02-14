@@ -12,7 +12,7 @@ import {
   Platform,
 } from 'react-native';
 import { Card, Button } from 'react-native-elements';
-import { doc, setDoc, getDoc, getDocs, updateDoc, collection, query, where } from 'firebase/firestore';
+import { doc, setDoc, getDoc, getDocs, updateDoc, collection, query, where, limit } from 'firebase/firestore';
 
 import { auth, firestore, storage } from '../../firebase';
 import { LoadingScreen } from './LoadingScreen';
@@ -100,11 +100,9 @@ const Deck = ({ data }) => {
     },{ capital: true },{ merge: true });
 
     // リクエストをfalseに
-    const requestRef = doc(firestore, `request/${auth.currentUser.uid}`);
+    const requestRef = doc(firestore, `request/${auth.currentUser.uid}/${auth.currentUser.uid}/${partner.uid}`);
     await updateDoc(requestRef, {
-      [partner.uid] : {
-        request : false,
-      }
+      request : false,
     },{ capital: true });
   };
 
@@ -190,23 +188,34 @@ const fromPartnerScreen = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(async () => {
+    // リクエストをもらった人のuidを取得
+    const requestRef = collection(firestore, `request/${auth.currentUser.uid}/${auth.currentUser.uid}`);
+    const q = query(requestRef, where(`request`, "==", true), limit(10));
+    const requestUsersSnap = await getDocs(q);
+    let uids = [];
+    requestUsersSnap.docs.forEach((doc) => {
+      uids.push(doc.id);
+    });
+    
+    // リクエストがなかったらテキトーな値を入れておく
+    if(uids.length == 0){
+      uids.push("0");
+    }
+
     // iconが更新されるごとにアイコンを取得
     const usersRef = collection(firestore, `users/`);
-    const requestRef = collection(firestore, `request/`);
-    const q = query(requestRef, where(``, "==", true));
-    const usersSnap = await getDocs(usersRef);
-
+    const userQuery = query(usersRef, where(`uid`, 'in', uids));
+    const usersSnap = await getDocs(userQuery);
     let users = [];
-    usersSnap.docs.forEach(async (doc) => {
-      if(doc.data().uid != auth.currentUser.uid){
-        users.push(
-          {
-            ...doc.data(),
-            uri : doc.data().imgURL == '' ? null : doc.data().imgURL,
-          }
-        );
-      }
+    usersSnap.docs.forEach((doc) => {
+      users.push(
+        {
+          ...doc.data(),
+          uri : doc.data().imgURL == '' ? null : doc.data().imgURL,
+        }
+      );
     });
+    
     setData(users);
     setLoading(false);
   },[]);
