@@ -18,12 +18,12 @@ import { LoadingScreen } from './LoadingScreen';
 
 
 const ChatTabScreen = () => {
+
   const navigation = useNavigation();
   const [users, setUsers] = useState([]);
   const [index, setIndex] = useState(0);
   
-
-  useEffect(() => getChatList(), [])
+  useEffect(() => getChatList(), []);
 
   const getChatList = async () => {
 
@@ -37,12 +37,16 @@ const ChatTabScreen = () => {
       chatNameList.push(doc.data().chatName);
     });
 
+    // とりあえずユーザ全員取得
+    // 後で10件ずつ検索してこれるように変更
     const matchingUserRef = collection(firestore, `users`);
     const matchingUserSnap = await getDocs(matchingUserRef);
-
     let userList = [];
     matchingUserSnap.docs.forEach((doc) => {
+
+      // マッチした人がいるか検索
       const i = matchingList.indexOf(doc.id);
+      // いたらユーザリストに追加
       if(i != -1){
         userList.push(
           {
@@ -88,7 +92,12 @@ const ListItem = ({ navigation, user }) => (
     onPress={() => {navigation.navigate('Chatroom', {...user})}}
   >
     <View style={styles.flexify}>
-      <Avatar rounded source={{ uri: user.imgURL }} />
+      {user.imgURL != "" 
+        ? <Avatar rounded source={{ uri: user.imgURL }} activeOpacity={0.7} /> 
+        : <Avatar rounded icon={{name: 'user', color: 'white', type: 'font-awesome'}} containerStyle={{backgroundColor: "gray"}} activeOpacity={0.7} />
+      }
+      {/* {<Avatar rounded source={ user.imgURL ? {uri: user.imgURL} : null } 
+      icon={{name: 'user', color: 'white', type: 'font-awesome'}} containerStyle={{backgroundColor: "gray"}} activeOpacity={0.7} />} */}
       <View style={{ marginLeft: 10 }}>
         <Text h4 style={{ fontWeight: "600" }}>
           {user.name}

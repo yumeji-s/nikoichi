@@ -1,34 +1,62 @@
-import React, { useCallback, useState } from 'react';
-import { StyleSheet, View, TouchableOpacity, Text, StatusBar, Image } from 'react-native';
+import React, { useCallback, useState, useEffect } from 'react';
+import { StyleSheet, View, TouchableOpacity, Text, StatusBar } from 'react-native';
 import { Overlay } from 'react-native-elements';
 import { GiftedChat } from 'react-native-gifted-chat';
 import 'dayjs/locale/ja';
-import { useNavigation } from '@react-navigation/native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import { addDoc, doc, setDoc, getDoc, getDocs, updateDoc, collection, query, where, limit, onSnapshot } from 'firebase/firestore';
 
 import { renderInputToolbar, renderActions, renderComposer, renderSend } from '../components/InputToolbar';
+import { auth, firestore, storage } from '../../firebase';
 
-const ChatRoomScreen = () => {
-    const navigation = useNavigation();
+const ChatRoomScreen = ({ route, navigation }) => {
     
     const [messages, setMessages] = useState([]);
+    const [currentUser, setCurrentUser] = useState([]);
     let id = 1;
+    const { uid } = route.params;
+    const { name } = route.params;
+    const { imgURL } = route.params;
+    const { chatRoom } = route.params;
 
-    onSend = useCallback((messages = []) => {
-        setMessages((previousMessages) => GiftedChat.append(GiftedChat.append(previousMessages, messages),[
-            {
-              _id: id,
-              text: 'すぐ会いたいです!',
-              createdAt: new Date(),
-              user: {
-                _id: 2,
-                name: 'React Native',
-                avatar: "",
-              },
+    useEffect(async () => {
+      // 最初のレンダリング時に自分の情報を取得
+      const userRef = doc(firestore, `users/${auth.currentUser.uid}`);
+      const snapShot = await getDoc(userRef);
+      if(snapShot.exists()){
+        setCurrentUser({
+          ...snapShot.data()
+        });
+      }
+    },[]);
+
+    onSend = useCallback( async (messages = []) => {
+      // メッセージをfirestoreに登録
+      const messageRef = collection(firestore, `chat/${chatRoom}/messages`);
+      const messageSnap = await addDoc(messageRef, {
+        ...messages,
+      });
+    },[]);
+
+    onSnapshot(doc(firestore, `chat/${chatRoom}`), (doc) => {
+      if(doc.exists()){
+        setMessages((previousMessages) => GiftedChat.append(previousMessages, [
+          {
+            _id: id,
+            text: doc.data().text,
+            createdAt: doc.data().sendAt,
+            user: {
+              _id: doc.data().messanger,
+              name: doc.data().uid == auth.currentUser.uid ? currentUser.name : name,
+              avatar: doc.data().uid == auth.currentUser.uid ? currentUser.imgURL : imgURL,
             },
-          ]));
-        id++
-    },[])
+          },
+        ]));
+        id++;console.log("bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb");
+      }else{
+        console.log("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
+      }
+    });
 
     return (
         <View style={styles.container}>
@@ -38,9 +66,9 @@ const ChatRoomScreen = () => {
                 messages={messages}
                 onSend={(messages) => onSend(messages)}
                 user={{
-                    _id: id,
-                    name: 'you',
-                    avater: 'https://placeimg.com/140/140/any'
+                    _id: auth.currentUser.uid,
+                    name: currentUser.name,
+                    avater: currentUser.imgURL
                 }}
                 locale='ja'
                 placeholder='メッセージを入力'
@@ -64,11 +92,11 @@ const ChatRoomScreen = () => {
                 renderSend={renderSend}
                 messagesContainerStyle={{ backgroundColor: '#eee8aa' }}
                 parsePatterns={(linkStyle) => [
-                    {
-                    pattern: /#(\w+)/,
-                    style: linkStyle,
-                    onPress: (tag) => console.log(`Pressed on hashtag: ${tag}`),
-                    },
+                  {
+                  pattern: /#(\w+)/,
+                  style: linkStyle,
+                  onPress: (tag) => console.log(`Pressed on hashtag: ${tag}`),
+                  },
                 ]}
             />
         </View>
