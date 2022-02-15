@@ -8,7 +8,7 @@ import {
   ScrollView,
   StatusBar,
 } from 'react-native';
-import { Avatar, Input, Overlay, Icon } from 'react-native-elements';
+import { Avatar, Input, Overlay, Icon, Card } from 'react-native-elements';
 import { useNavigation } from '@react-navigation/native';
 import { MaterialIcons  } from '@expo/vector-icons';
 import { doc, setDoc, getDoc, getDocs, updateDoc, collection, query, where, limit } from 'firebase/firestore';
@@ -17,7 +17,7 @@ import { auth, firestore, storage } from '../../firebase';
 import { LoadingScreen } from './LoadingScreen';
 
 
-const ChatTabScreen = () => {
+const MatchUserTabScreen = () => {
   const navigation = useNavigation();
   const [users, setUsers] = useState([]);
   const [index, setIndex] = useState(0);
@@ -72,7 +72,7 @@ const Search = () => (
     style={[styles.flexify, { marginHorizontal: 5, marginTop: 10 }]}
   >
     <Input
-      placeholder="Search messages"
+      placeholder="Search Match Users"
       leftIcon={<Icon name="search" size={24} color="gray" />}
       inputContainerStyle={{ borderBottomWidth: 0 }}
       // onChangeText={}
@@ -87,17 +87,18 @@ const ListItem = ({ navigation, user }) => (
     style={[styles.flexify, styles.bordered]}
     onPress={() => {navigation.navigate('Chatroom', {...user})}}
   >
-    <View style={styles.flexify}>
-      <Avatar rounded source={{ uri: user.imgURL }} />
-      <View style={{ marginLeft: 10 }}>
-        <Text h4 style={{ fontWeight: "600" }}>
-          {user.name}
-        </Text>
-        <Text>Nice to meet you too!</Text>
-      </View>
+    <View style={{ width: '40%' }}>
+      <Card>
+        <Card.Title>{user.name}</Card.Title>
+        <Card.Divider />
+        <Card.Image
+          style={{ padding: 0 }}
+          resizeMode="cover"
+          source={{ uri: user.imgURL }}
+        />
+        <Text style={{ marginBottom: 10 }}>{user.introduction}</Text>
+      </Card>
     </View>
-
-    <Text>Nov 12</Text>
   </TouchableOpacity>
 );
 
@@ -137,4 +138,4 @@ const styles = StyleSheet.create({
   },
 })
 
-export { ChatTabScreen };
+export { MatchUserTabScreen };

@@ -92,6 +92,10 @@ const Deck = ({ data }) => {
     setDoc(requestRef, {
       request : true,
     },{ capital: true }, { merge: true });
+    const requestPartnerRef = doc(firestore, `request/${auth.currentUser.uid}/${auth.currentUser.uid}/${partner.uid}`);
+    setDoc(requestPartnerRef, {
+      request : false,
+    },{ capital: true }, { merge: true });
   };
 
   const onSwipeLeft = (partner) => {
@@ -183,7 +187,6 @@ const SwipeScreen = () => {
     requestUsersSnap.docs.forEach((doc) => {
       uids.push(doc.id);
     });
-    console.log(uids);
 
     // 最大30件取得して非表示ユーザ以外をセット
     const usersRef = collection(firestore, `users/`);
@@ -191,13 +194,14 @@ const SwipeScreen = () => {
     const usersSnap = await getDocs(userQuery);
     let users = [];
     usersSnap.docs.forEach((doc) => {
-      if(!uids.includes(doc.id))
-      users.push(
-        {
-          ...doc.data(),
-          uri : doc.data().imgURL == '' ? null : doc.data().imgURL,
-        }
-      );
+      if(!uids.includes(doc.id)){
+        users.push(
+          {
+            ...doc.data(),
+            uri : doc.data().imgURL == '' ? null : doc.data().imgURL,
+          }
+        );
+      }
     });
     
     setData(users);

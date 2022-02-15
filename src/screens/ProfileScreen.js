@@ -18,7 +18,7 @@ const ProfileScreen = () => {
   const navigation = useNavigation();
   const [user, setUser] = useState();
   const [icon, setIcon] = useState(null);
-  const [iconLocked, setIconLocked] = useState(false);
+  const [iconUpdateAt, setIconUpdateAt] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(async () => {
@@ -27,6 +27,7 @@ const ProfileScreen = () => {
     const snapShot = await getDoc(userRef);
     if(snapShot.data().imgURL != ''){
       setIcon(snapShot.data().imgURL);
+      setIconUpdateAt(snapShot.data().updateAt);
     }
     setUser({
       name: snapShot.data().name,
@@ -34,8 +35,6 @@ const ProfileScreen = () => {
     });
     setLoading(false);
   },[]);
-
-  const unLock = useCallback(() => setIconLocked(false), []);
 
   const handleLogout = () => {
     signOut(auth)
@@ -49,7 +48,9 @@ const ProfileScreen = () => {
 
   const pickImage = async () => {
 
-    if(iconLocked){
+    // アイコンが更新されたら五分間更新できないようにする
+    const update = (new Date() - iconUpdateAt) / (1000 * 60) < 5;
+    if(update){
       return;
     }
 
@@ -66,8 +67,6 @@ const ProfileScreen = () => {
       // aspect: [4, 3],
       quality: 1,
     });
-
-    console.log(result);
 
     if (!result.cancelled) {
       updateIcon(result.uri);
@@ -88,19 +87,11 @@ const ProfileScreen = () => {
       const imgUrl = await getDownloadURL(ref(storage, `images/${auth.currentUser.uid}/icon`));
       updateDoc(userIconRef, {
         imgURL : imgUrl,
+        updateAt : new Date(),
       }, { capital: true });
+      setIconUpdateAt(new Date());
       setIcon(url);
-      setIconLocked(true);
-      setTimeout(unLock, 300000); // 五分間アイコンを変更不可に
     });
-  };
-
-  const updateProfile = () => {
-    const userRef = doc(firestore, `users/${auth.currentUser.uid}`);
-    updateDoc(userRef, {
-      birth : new Date(),
-    },{ capital: true });
-    console.log("update");
   };
 
   if(loading){
@@ -115,8 +106,17 @@ const ProfileScreen = () => {
           <Button style={styles.button} onPress={handleLogout}>ログアウト</Button>
         </View>
         <View alignSelf="center">
-          {icon && <Avatar rounded size="xlarge" title={user.name} source={{ uri : icon }} onPress={pickImage}  activeOpacity={0.7}><Avatar.Accessory size={50} /></Avatar>}
-          {/* {!icon && <Avatar icon={{name: 'user', type: 'font-awesome'}} source={{ uri : icon }} key={icon} />} */}
+          {icon && 
+            <Avatar rounded size="xlarge" title={user.name} source={{ uri : icon }} activeOpacity={0.7} key={icon} onPress={pickImage}>
+              <Avatar.Accessory size={50} />
+            </Avatar>
+          }
+          {!icon && 
+            <Avatar rounded size="xlarge" title={user.name} icon={{name: 'user', type: 'font-awesome'}} 
+            overlayContainerStyle={{backgroundColor: 'lightskyblue'}} activeOpacity={0.7}  onPress={pickImage}>
+              <Avatar.Accessory size={50} />
+            </Avatar>
+          }
         </View>
       </View>
     </NativeBaseProvider>

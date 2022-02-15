@@ -7,6 +7,7 @@ import { onAuthStateChanged } from 'firebase/auth'
 
 import { ChatRoomScreen } from '../screens/ChatRoomScreen'
 import { ChatTabScreen } from '../screens/ChatTabScreen'
+import { MatchUserTabScreen } from '../screens/MatchUserTabScreen'
 import { ProfileScreen } from '../screens/ProfileScreen'
 import { SearchTabScreen } from '../screens/SearchTabScreen'
 import { SwipeScreen } from '../screens/SwipeScreen'
@@ -63,6 +64,21 @@ const fromPartnerStackNavigator = () => (
         headerTitle: 'メイン',
         headerBackTitleVisible: false,
         headerShown: false,
+      }}
+    />
+  </Stack.Navigator>
+)
+
+const MatchUserStackNavigator = () => (
+  <Stack.Navigator initialRouteName="Main">
+    <Stack.Screen
+      name="Main"
+      component={MatchUserTabScreen}
+      options={{
+        headerTitle: 'やりとり',
+        headerBackTitleVisible: false,
+        headerTitleAlign: 'center',
+        // headerShown: false,
       }}
     />
   </Stack.Navigator>
@@ -126,6 +142,7 @@ const ProfileNavigator = () => (
 // 親タブ
 const ParentTab = createBottomTabNavigator()
 const userTab = createMaterialTopTabNavigator();
+const chatTab = createMaterialTopTabNavigator();
 
 const userTabs = () => {
   return (
@@ -142,6 +159,25 @@ const userTabs = () => {
     >
       <userTab.Screen name="bestUser" options={{ tabBarLabel: 'おすすめ' }} component={HomeStackNavigator} />
       <userTab.Screen name="fromPartner" options={{ tabBarLabel: '相手から' }} component={fromPartnerStackNavigator} />
+    </userTab.Navigator>
+  );
+}
+
+const chatTabs = () => {
+  return (
+    <userTab.Navigator
+      initialRouteName="chatRooms"
+      screenOptions={({ route }) => ({
+        "tabBarStyle": [
+          {
+            "display": "flex"
+          },
+          null
+        ]
+      })}
+    >
+      <userTab.Screen name="matchUser" options={{ tabBarLabel: 'マッチした人' }} component={MatchUserStackNavigator} />
+      <userTab.Screen name="chatRooms" options={{ tabBarLabel: 'メッセージ' }} component={ChatStackNavigator} />
     </userTab.Navigator>
   );
 }
@@ -203,7 +239,7 @@ const TabNavigator = () => {
     >
       <ParentTab.Screen name="bestUsersTab" component={userTabs} />
       <ParentTab.Screen name="SearchTab" component={SearchStackNavigator} />
-      <ParentTab.Screen name="ChatTab" component={ChatStackNavigator} />
+      <ParentTab.Screen name="ChatTab" component={chatTabs} />
       <ParentTab.Screen name="ProfTab" component={ProfileNavigator} />
     </ParentTab.Navigator>
   )

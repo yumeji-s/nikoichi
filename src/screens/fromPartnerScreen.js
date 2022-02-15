@@ -90,11 +90,11 @@ const Deck = ({ data }) => {
   const onSwipeRight = async (partner) => {
 
     // マッチング済みに追加
-    const matchingRef = collection(firestore, `matching/${auth.currentUser.uid}/${partner.uid}`);
+    const matchingRef = collection(firestore, `matching/${auth.currentUser.uid}/${auth.currentUser.uid}`);
     await setDoc(doc(matchingRef, partner.uid), {
       chatName : auth.currentUser.uid + partner.uid,
     },{ capital: true },{ merge: true });
-    const partnerRef = collection(firestore, `matching/${partner.uid}/${auth.currentUser.uid}`);
+    const partnerRef = collection(firestore, `matching/${partner.uid}/${partner.uid}`);
     await setDoc(doc(partnerRef, auth.currentUser.uid), {
       chatName : auth.currentUser.uid + partner.uid,
     },{ capital: true },{ merge: true });
