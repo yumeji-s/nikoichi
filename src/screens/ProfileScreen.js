@@ -106,17 +106,13 @@ const ProfileScreen = () => {
           <Button style={styles.button} onPress={handleLogout}>ログアウト</Button>
         </View>
         <View alignSelf="center">
-          {icon && 
-            <Avatar rounded size="xlarge" title={user.name} source={{ uri : icon }} activeOpacity={0.7} key={icon} onPress={pickImage}>
-              <Avatar.Accessory size={50} />
-            </Avatar>
-          }
-          {!icon && 
-            <Avatar rounded size="xlarge" title={user.name} icon={{name: 'user', type: 'font-awesome'}} 
-            overlayContainerStyle={{backgroundColor: 'lightskyblue'}} activeOpacity={0.7}  onPress={pickImage}>
-              <Avatar.Accessory size={50} />
-            </Avatar>
-          }
+          {icon && <Avatar rounded size="xlarge" source={{uri: icon}} activeOpacity={0.7} key={icon} onPress={pickImage}>
+            <Avatar.Accessory size={50} onPress={pickImage} />
+          </Avatar>}
+          {!icon && <Avatar rounded size="xlarge" icon={{name: 'user', color: 'white', type: 'font-awesome'}}
+              containerStyle={{backgroundColor: "gray"}} activeOpacity={0.7} key={icon} onPress={pickImage}>
+            <Avatar.Accessory size={50} onPress={pickImage} />
+          </Avatar>}
         </View>
       </View>
     </NativeBaseProvider>

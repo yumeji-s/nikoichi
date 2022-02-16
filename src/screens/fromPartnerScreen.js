@@ -182,7 +182,7 @@ const RenderNoMoreCards = () => {
   );
 };
 
-const fromPartnerScreen = () => {
+const FromPartnerScreen = () => {
 
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -264,4 +264,4 @@ const styles = StyleSheet.create({
 });
 
 
-export {fromPartnerScreen};
+export {FromPartnerScreen};

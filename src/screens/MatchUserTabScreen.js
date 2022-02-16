@@ -94,7 +94,7 @@ const ListItem = ({ navigation, user }) => (
         <Card.Image
           style={{ padding: 0 }}
           resizeMode="cover"
-          source={{ uri: user.imgURL }}
+          source={{ uri : user.imgURL ? user.imgURL : undefined }} 
         />
         <Text style={{ marginBottom: 10 }}>{user.introduction}</Text>
       </Card>

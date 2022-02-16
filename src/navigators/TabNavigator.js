@@ -11,7 +11,7 @@ import { MatchUserTabScreen } from '../screens/MatchUserTabScreen'
 import { ProfileScreen } from '../screens/ProfileScreen'
 import { SearchTabScreen } from '../screens/SearchTabScreen'
 import { SwipeScreen } from '../screens/SwipeScreen'
-import { fromPartnerScreen } from '../screens/fromPartnerScreen'
+import { FromPartnerScreen } from '../screens/FromPartnerScreen'
 import { LoginScreen } from '../screens/LoginScreen'
 import { RegisterScreen } from '../screens/RegisterScreen'
 import { LoadingScreen } from '../screens/LoadingScreen'
@@ -59,7 +59,7 @@ const fromPartnerStackNavigator = () => (
   <Stack.Navigator initialRouteName="Home">
     <Stack.Screen
       name="Home"
-      component={fromPartnerScreen}
+      component={FromPartnerScreen}
       options={{
         headerTitle: 'メイン',
         headerBackTitleVisible: false,

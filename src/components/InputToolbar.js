@@ -1,5 +1,4 @@
 import React from 'react';
-import { Image } from 'react-native';
 import { InputToolbar, Actions, Composer, Send } from 'react-native-gifted-chat';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 

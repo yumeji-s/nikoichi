@@ -14,7 +14,6 @@ import { MaterialIcons  } from '@expo/vector-icons';
 import { doc, setDoc, getDoc, getDocs, updateDoc, collection, query, where, limit } from 'firebase/firestore';
 
 import { auth, firestore, storage } from '../../firebase';
-import { LoadingScreen } from './LoadingScreen';
 
 
 const ChatTabScreen = () => {
@@ -93,11 +92,9 @@ const ListItem = ({ navigation, user }) => (
   >
     <View style={styles.flexify}>
       {user.imgURL != "" 
-        ? <Avatar rounded source={{ uri: user.imgURL }} activeOpacity={0.7} /> 
+        ? <Avatar rounded source={{uri: user.imgURL}} activeOpacity={0.7} />
         : <Avatar rounded icon={{name: 'user', color: 'white', type: 'font-awesome'}} containerStyle={{backgroundColor: "gray"}} activeOpacity={0.7} />
       }
-      {/* {<Avatar rounded source={ user.imgURL ? {uri: user.imgURL} : null } 
-      icon={{name: 'user', color: 'white', type: 'font-awesome'}} containerStyle={{backgroundColor: "gray"}} activeOpacity={0.7} />} */}
       <View style={{ marginLeft: 10 }}>
         <Text h4 style={{ fontWeight: "600" }}>
           {user.name}

@@ -1,109 +1,233 @@
-import React, { useCallback, useState, useEffect } from 'react';
+import React, { useCallback, useState, useEffect, useRef } from 'react';
 import { StyleSheet, View, TouchableOpacity, Text, StatusBar } from 'react-native';
 import { Overlay } from 'react-native-elements';
 import { GiftedChat } from 'react-native-gifted-chat';
 import 'dayjs/locale/ja';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import { addDoc, doc, setDoc, getDoc, getDocs, updateDoc, collection, query, where, limit, onSnapshot } from 'firebase/firestore';
+import { addDoc, doc, setDoc, getDoc, getDocs, updateDoc, collection, query, where, limit, onSnapshot, orderBy } from 'firebase/firestore';
 
 import { renderInputToolbar, renderActions, renderComposer, renderSend } from '../components/InputToolbar';
-import { auth, firestore, storage } from '../../firebase';
+import { auth, firestore } from '../../firebase';
+// import { useInfiniteSnapshotListener } from '../components/ChatListener';
+
+
+
+// やること
+// messagesをひとつに
+// messagesがstate更新されてない
+// 別のファイルに分ける
+// 二つの端末で確認
+
 
 const ChatRoomScreen = ({ route, navigation }) => {
     
-    const [messages, setMessages] = useState([]);
-    const [currentUser, setCurrentUser] = useState([]);
-    let id = 1;
-    const { uid } = route.params;
-    const { name } = route.params;
-    const { imgURL } = route.params;
-    const { chatRoom } = route.params;
-
-    useEffect(async () => {
-      // 最初のレンダリング時に自分の情報を取得
-      const userRef = doc(firestore, `users/${auth.currentUser.uid}`);
-      const snapShot = await getDoc(userRef);
-      if(snapShot.exists()){
-        setCurrentUser({
-          ...snapShot.data()
-        });
-      }
-    },[]);
-
-    onSend = useCallback( async (messages = []) => {
-      // メッセージをfirestoreに登録
-      const messageRef = collection(firestore, `chat/${chatRoom}/messages`);
-      const messageSnap = await addDoc(messageRef, {
-        ...messages,
+  const [messages, setMessages] = useState([]);                           // 全メッセージ
+  const [currentUser, setCurrentUser] = useState([]);                     // ログインしているユーザ
+  const [sentinel, setSentinel] = useState();                             // 最後のメッセージのid
+  const { chatRoom } = route.params;                                      // チャットルーム名
+  const messageRef = collection(firestore, `chat/${chatRoom}/messages`);  // メッセージ登録用
+  // const { messages, readMore, initRead } = useInfiniteSnapshotListener(chatRoom);
+  
+  useEffect(async () => {
+    // 最初のレンダリング時に自分の情報を取得
+    const userRef = doc(firestore, `users/${auth.currentUser.uid}`);
+    const snapShot = await getDoc(userRef);
+    if(snapShot.exists()){
+      setCurrentUser({
+        ...snapShot.data()
       });
-    },[]);
-
-    onSnapshot(doc(firestore, `chat/${chatRoom}`), (doc) => {
-      if(doc.exists()){
-        setMessages((previousMessages) => GiftedChat.append(previousMessages, [
-          {
-            _id: id,
-            text: doc.data().text,
-            createdAt: doc.data().sendAt,
-            user: {
-              _id: doc.data().messanger,
-              name: doc.data().uid == auth.currentUser.uid ? currentUser.name : name,
-              avatar: doc.data().uid == auth.currentUser.uid ? currentUser.imgURL : imgURL,
-            },
-          },
-        ]));
-        id++;console.log("bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb");
-      }else{
-        console.log("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
-      }
-    });
-
-    return (
-        <View style={styles.container}>
-            <Header navigation={navigation}></Header>
-        
-            <GiftedChat
-                messages={messages}
-                onSend={(messages) => onSend(messages)}
-                user={{
-                    _id: auth.currentUser.uid,
-                    name: currentUser.name,
-                    avater: currentUser.imgURL
-                }}
-                locale='ja'
-                placeholder='メッセージを入力'
-                keyboardShouldPersistTaps='never'
-                timeFormat='H:mm'
-                onPressAvatar={console.log}
-                containerStyle={styles.sendArea}
-                textInputStyle={styles.sendInput}
-                alignTop={true}
-                alwaysShowSend={true}
-                infiniteScroll={true}
-                // loadEarlier={isLoadingEarlier}
-                isLoadingEarlier={true}
-                listViewProps={{
-                    // onEndReached: this.onEndReached,
-                    onEndReachedThreshold: 0.4,
-                }}
-                renderInputToolbar={renderInputToolbar}
-                renderActions={renderActions}
-                renderComposer={renderComposer}
-                renderSend={renderSend}
-                messagesContainerStyle={{ backgroundColor: '#eee8aa' }}
-                parsePatterns={(linkStyle) => [
-                  {
-                  pattern: /#(\w+)/,
-                  style: linkStyle,
-                  onPress: (tag) => console.log(`Pressed on hashtag: ${tag}`),
-                  },
-                ]}
-            />
-        </View>
-    );
+    }
 
     
+
+    // 最後のメッセージのidを取得
+    const q = query(messageRef, orderBy('createdAt','asc'), limit(1));
+    const querySnapshot = await getDocs(q);
+    querySnapshot.forEach((doc) => {
+      setSentinel(doc);
+    });
+
+
+
+    onSnapshot(query(messageRef, orderBy("createdAt","asc")), (snapshot) => {dispMsgSnap(snapshot)});
+  },[]);
+
+  // 初回読み込み
+  // useEffect(()=>{
+  //   initRead();
+  // },[initRead]);
+
+  // メッセージは残っているか
+  const hasMore = sentinel ? !Boolean( messages.find(m => m.id === sentinel.id)) : false;
+
+
+  const dispMsgSnap = (snapshot) => {
+        // 取得したメッセージを表示できるように加工
+        snapshot.docChanges().forEach((change) => {
+          const id = change.doc.id;
+          const chat = change.doc.data();
+          const newMessage = {
+          _id: id,
+          text: chat.text,
+          createdAt: chat.createdAt.toDate(),
+          user: {
+            _id: chat.user._id,
+            name: chat.user.name,
+            avatar: chat.avatar
+          }
+          };
+          switch(change.type){
+          case 'added':
+            msgAppend(newMessage);
+            break;
+          case 'modified':
+            break;
+          case 'removed':
+            break;
+          default: 
+            break;
+          }
+        });
+      };
+      
+      const msgAppend = (newMessage = []) => {
+        // メッセージを連結
+        setMessages((previousMessages) => {
+          console.log(messages);GiftedChat.append(previousMessages,newMessage)});
+      };
+  
+
+  // 送信時の処理
+  const onSend = async (messages = []) => {
+    // メッセージをfirestoreに登録
+    const messageSnap = await addDoc(messageRef, ...messages);
+  };
+
+  return (
+      <View style={styles.container}>
+          <Header navigation={navigation}></Header>
+      
+          <GiftedChat
+              messages={messages}
+              onSend={(messages) => onSend(messages)}
+              user={{
+                  _id: auth.currentUser.uid,
+                  name: currentUser.name,
+                  avater: currentUser.imgURL
+              }}
+              locale='ja'
+              placeholder='メッセージを入力'
+              keyboardShouldPersistTaps='never'
+              timeFormat='H:mm'
+              onPressAvatar={console.log}
+              containerStyle={styles.sendArea}
+              textInputStyle={styles.sendInput}
+              alignTop={true}
+              alwaysShowSend={true}
+              infiniteScroll={true}
+              // loadEarlier={isLoadingEarlier}
+              isLoadingEarlier={hasMore}
+              listViewProps={{
+                  // onEndReached: readMore(),
+                  onEndReachedThreshold: 0.4,
+              }}
+              renderInputToolbar={renderInputToolbar}
+              renderActions={renderActions}
+              renderComposer={renderComposer}
+              renderSend={renderSend}
+              messagesContainerStyle={{ backgroundColor: '#eee8aa' }}
+              parsePatterns={(linkStyle) => [
+                {
+                pattern: /#(\w+)/,
+                style: linkStyle,
+                onPress: (tag) => console.log(`Pressed on hashtag: ${tag}`),
+                },
+              ]}
+          />
+      </View>
+  );
 }
+
+
+// const now = Date.now();
+// const useInfiniteSnapshotListener = (chatRoom) => {
+
+//   const unsubscribes = useRef([]);
+//   const [messages, setMessages] = useState([]);
+//   const messageRef = collection(firestore, `chat/${chatRoom}/messages`);  // メッセージ登録用
+
+//   // 未来（最新メッセージ）の購読リスナー
+//   const registLatestMessageListener = useCallback(() => {
+//       return onSnapshot(query(messageRef, startAfter(now), orderBy("createdAt","asc"), limit(limit)), (snapshot) => {dispMsgSnap(snapshot)});
+//   },[]);
+
+//   //過去メッセージの購読リスナー
+//   const registPastMessageListener = useCallback((startAfter) => {
+//       return onSnapshot(query(messageRef, startAfter(startAfter), orderBy("createdAt","desc"), limit(limit)), (snapshot) => {dispMsgSnap(snapshot)});
+//   },[]);
+
+//   // 初回ロード
+//   const initRead = useCallback(() => {
+//       // 未来のメッセージを購読する
+//       unsubscribes.current.push(registLatestMessageListener());
+//       // 現時刻よりも古いデータを一定数、購読する
+//       unsubscribes.current.push(registPastMessageListener(now));
+//   },[registPastMessageListener]);
+
+//   // スクロール時、追加購読するためのリスナー
+//   const lastMessageDate = messages[messages.length - 1].createdAt;
+//   const readMore = useCallback(() => {
+//       unsubscribes.current.push(registPastMessageListener(lastMessageDate));
+//   },[registPastMessageListener,lastMessageDate]);
+
+//   // 登録解除(Unmount時に解除）
+//   const clear = useCallback(() => {
+//       for(const unsubscribe of unsubscribes.current){
+//           unsubscribe();
+//       }
+//   },[]);
+
+//   useEffect(() => { return () => { clear(); }; }, [clear]);
+
+
+//   const dispMsgSnap = (snapshot) => {
+//     // 取得したメッセージを表示できるように加工
+//     snapshot.docChanges().forEach((change) => {
+//       const id = change.doc.id;
+//       const chat = change.doc.data();
+//       const newMessage = {
+//       _id: id,
+//       text: chat.text,
+//       createdAt: chat.createdAt.toDate(),
+//       user: {
+//         _id: chat.user._id,
+//         name: chat.user.name,
+//         avatar: chat.avatar
+//       }
+//       };
+//       switch(change.type){
+//       case 'added':
+//         msgAppend(newMessage);
+//         break;
+//       case 'modified':
+//         break;
+//       case 'removed':
+//         break;
+//       default: 
+//         break;
+//       }
+//     });
+//   };
+  
+//   const msgAppend = (newMessage = []) => {
+//     // メッセージを連結
+//     setMessages((previousMessages) => GiftedChat.append(previousMessages,newMessage));
+//   };
+
+//   return { initRead, readMore, messages };
+// };
+
+
 
 const Header = ({ navigation }) => {
     const [visible, setVisible] = useState(false)
