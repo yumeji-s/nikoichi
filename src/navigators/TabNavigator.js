@@ -17,28 +17,6 @@ import { RegisterScreen } from '../screens/RegisterScreen'
 import { LoadingScreen } from '../screens/LoadingScreen'
 import { auth } from '../../firebase'
 
-const userInfo = () => {
-  const [user, setUser] = useState(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState(null)
-
-  // ログイン情報の取得
-  useEffect(() => {
-    // ログイン状況の監視
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (user) {
-        setUser(user)
-      }else{
-        setUser(null)
-      }
-      setLoading(false)
-    })
-    // 監視の解除
-    return () => unsubscribe()
-  }, []);
-  return [user == null ? false : true, loading]
-}
-
 const Stack = createStackNavigator()
 
 const HomeStackNavigator = () => (
@@ -182,17 +160,42 @@ const chatTabs = () => {
   );
 }
 
+const userInfo = () => {
+  const [user, setUser] = useState(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
+
+  // ログイン情報の取得
+  useEffect(() => {
+    // ログイン状況の監視
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        setUser(user)
+      }else{
+        setUser(null)
+      }
+      setLoading(false)
+    })
+    // 監視の解除
+    return () => unsubscribe()
+  }, []);
+  return [user == null ? false : true, loading]
+}
+
 const TabNavigator = () => {
 
   const [user, loading] = userInfo();
+  const [render, setRender] = useState(false);
+  let count = false;
 
   if(loading){
     return <LoadingScreen/>
   }
 
   if(!user){
+    count = true;
     return (
-        <Stack.Navigator  initialRouteName="Main">
+        <Stack.Navigator initialRouteName="Main">
           <Stack.Screen 
             name="Login" 
             component={LoginScreen}
@@ -209,6 +212,16 @@ const TabNavigator = () => {
           />
         </Stack.Navigator>
       )
+  }
+
+  if(count){
+    setRender(reRender => !reRender);
+  }
+
+  // 初回登録した人
+  if(auth.currentUser.metadata.creationTime == auth.currentUser.metadata.lastSignInTime){
+    // プロフィール登録
+    console.log("profile");
   }
 
   return (

@@ -21,6 +21,12 @@ const RegisterScreen = () => {
     const handleRegister = async () => {
         try {
           const user = await createUserWithEmailAndPassword(auth, email, password);
+          // 自分がおすすめユーザに表示されないように
+          const requestRef = doc(firestore, `request/${auth.currentUser.uid}/${auth.currentUser.uid}/${auth.currentUser.uid}`);
+          await setDoc(requestRef, {
+            request : false,
+          });
+
           const userRef = doc(firestore, `users/${auth.currentUser.uid}`);
           await setDoc(userRef, {
             name : name,
@@ -28,12 +34,6 @@ const RegisterScreen = () => {
             imgURL : "",
             uid : auth.currentUser.uid,
             introduction : "",
-          });
-
-          // 自分がおすすめユーザに表示されないように
-          const requestRef = doc(firestore, `request/${auth.currentUser.uid}/${auth.currentUser.uid}/${auth.currentUser.uid}`);
-          await setDoc(requestRef, {
-            request : false,
           });
           console.log("アカウント作成");
         } catch (error) {

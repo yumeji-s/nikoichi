@@ -38,8 +38,7 @@ const SwipeScreen = () => {
           }
         );
       }
-    });
-    
+    });    
     setData(users);
     setLoading(false);
   },[]);
