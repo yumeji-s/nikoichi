@@ -20,7 +20,6 @@ const ChatTabScreen = () => {
 
   const navigation = useNavigation();
   const [users, setUsers] = useState([]);
-  const [index, setIndex] = useState(0);
   
   useEffect(() => getChatList(), []);
 
@@ -58,17 +57,93 @@ const ChatTabScreen = () => {
     setUsers(userList);
   }
 
+  // 最後のメッセージを取得
+  const getMessages = (user) => {
+    
+    return message;
+  }
+
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView style={styles.childContainer}>
         <Search />
         {users.map((user, index) => (
-          <ListItem key={index} user={user} navigation={navigation} />
+          <ListItem key={index} user={user} lastMessage={getMessages(user)} navigation={navigation} />
         ))}
       </ScrollView>
     </SafeAreaView>
   )
 }
+
+const now = Date.now();
+const lastMessageSnapshotListener = (chatRoom) => {
+
+  const unsubscribes = useRef([]);
+  const [messages, setMessages] = useState([]);
+  const messageRef = collection(firestore, `chat/${chatRoom}/messages`);  // メッセージ登録用
+
+  // 未来（最新メッセージ）の購読リスナー
+  // const registLatestMessageListener = useCallback(() => {
+  //     return onSnapshot(query(messageRef, orderBy("createdAt","asc"), startAfter(now), limit(1)), (snapshot) => {dispMsgSnap(snapshot)});
+  // },[]);
+
+  //過去メッセージの購読リスナー
+  const registPastMessageListener = useCallback((time) => {
+      return onSnapshot(query(messageRef, orderBy("createdAt","desc"), startAfter(time), limit(1)), (snapshot) => {dispMsgSnap(snapshot)});
+  },[]);
+
+  // 初回ロード
+  const initRead = useCallback(() => {
+    // 未来のメッセージを購読する
+    // unsubscribes.current.push(registLatestMessageListener());
+    // 現時刻よりも古いデータを一定数、購読する
+    unsubscribes.current.push(registPastMessageListener(now));
+  },[registPastMessageListener]);
+
+  // 登録解除(Unmount時に解除）
+  const clear = useCallback(() => {
+    for(const unsubscribe of unsubscribes.current){
+      unsubscribe();
+    }
+  },[]);
+
+  useEffect(() => { return () => { clear(); }; }, [clear]);
+
+  const dispMsgSnap = (snapshot) => {
+    // 取得したメッセージを表示できるように加工
+    snapshot.docChanges().forEach((change) => {
+      const id = change.doc.id;
+      const chat = change.doc.data();
+      const newMessage = {
+        _id: id,
+        text: chat.text,
+        createdAt: chat.createdAt.toDate(),
+        user: {
+          _id: chat.user._id,
+          name: chat.user.name,
+          avatar: chat.user.avatar
+        }
+      };
+      switch(change.type){
+      case 'added':
+        msgAppend(newMessage);
+        break;
+      case 'modified':
+        break;
+      case 'removed':
+        break;
+      default: 
+        break;
+      }
+    });
+  };
+  
+  const msgAppend = (newMessage = []) => {
+    // 最新メッセージを表示
+    
+  };
+  return { initRead, readMore, messages };
+};
 
 const Search = () => (
   <View
@@ -85,7 +160,7 @@ const Search = () => (
   </View>
 )
 
-const ListItem = ({ navigation, user }) => (
+const ListItem = ({ navigation, user, lastMessage }) => (
   <TouchableOpacity
     style={[styles.flexify, styles.bordered]}
     onPress={() => {navigation.navigate('Chatroom', {...user})}}
@@ -99,11 +174,11 @@ const ListItem = ({ navigation, user }) => (
         <Text h4 style={{ fontWeight: "600" }}>
           {user.name}
         </Text>
-        <Text>Nice to meet you too!</Text>
+        <Text>{lastMessage.text}</Text>
       </View>
     </View>
 
-    <Text>Nov 12</Text>
+    <Text>{lastMessage.createdAt}</Text>
   </TouchableOpacity>
 );
 

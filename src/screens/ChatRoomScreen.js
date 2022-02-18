@@ -13,10 +13,7 @@ import { auth, firestore } from '../../firebase';
 
 
 // やること
-// messagesをひとつに
-// messagesがstate更新されてない
 // 別のファイルに分ける
-// 二つの端末で確認
 
 
 const ChatRoomScreen = ({ route, navigation }) => {
@@ -38,7 +35,7 @@ const ChatRoomScreen = ({ route, navigation }) => {
       });
     }
 
-    // 最後のメッセージのidを取得
+    // 最後のメッセージを取得
     const q = query(messageRef, orderBy('createdAt','asc'), limit(1));
     const querySnapshot = await getDocs(q);
     querySnapshot.forEach((doc) => {
@@ -72,7 +69,7 @@ const ChatRoomScreen = ({ route, navigation }) => {
               user={{
                   _id: currentUser.uid,
                   name: currentUser.name,
-                  avater: currentUser.imgURL
+                  avatar: currentUser.imgURL
               }}
               locale='ja'
               placeholder='メッセージを入力'
@@ -126,24 +123,24 @@ const useInfiniteSnapshotListener = (chatRoom) => {
 
   // 初回ロード
   const initRead = useCallback(() => {
-      // 未来のメッセージを購読する
-      unsubscribes.current.push(registLatestMessageListener());
-      // 現時刻よりも古いデータを一定数、購読する
-      unsubscribes.current.push(registPastMessageListener(now));
+    // 未来のメッセージを購読する
+    unsubscribes.current.push(registLatestMessageListener());
+    // 現時刻よりも古いデータを一定数、購読する
+    unsubscribes.current.push(registPastMessageListener(now));
   },[registPastMessageListener]);
 
   // スクロール時、追加購読するためのリスナー
   const lastMessageDate = messages.length > 0 ? messages[messages.length - 1].createdAt : now;
   
   const readMore = useCallback(() => {
-      unsubscribes.current.push(registPastMessageListener(lastMessageDate));
+    unsubscribes.current.push(registPastMessageListener(lastMessageDate));
   },[registPastMessageListener,lastMessageDate]);
 
   // 登録解除(Unmount時に解除）
   const clear = useCallback(() => {
-      for(const unsubscribe of unsubscribes.current){
-          unsubscribe();
-      }
+    for(const unsubscribe of unsubscribes.current){
+      unsubscribe();
+    }
   },[]);
 
   useEffect(() => { return () => { clear(); }; }, [clear]);
@@ -155,14 +152,14 @@ const useInfiniteSnapshotListener = (chatRoom) => {
       const id = change.doc.id;
       const chat = change.doc.data();
       const newMessage = {
-      _id: id,
-      text: chat.text,
-      createdAt: chat.createdAt.toDate(),
-      user: {
-        _id: chat.user._id,
-        name: chat.user.name,
-        avater: chat.avater
-      }
+        _id: id,
+        text: chat.text,
+        createdAt: chat.createdAt.toDate(),
+        user: {
+          _id: chat.user._id,
+          name: chat.user.name,
+          avatar: chat.user.avatar
+        }
       };
       switch(change.type){
       case 'added':
@@ -182,17 +179,16 @@ const useInfiniteSnapshotListener = (chatRoom) => {
     // メッセージを連結
     setMessages((previousMessages) => GiftedChat.append(previousMessages,newMessage));
   };
-
   return { initRead, readMore, messages };
 };
 
 
 
 const Header = ({ navigation }) => {
-    const [visible, setVisible] = useState(false)
+    const [visible, setVisible] = useState(false);
   
     const toggleOverlay = () => {
-      setVisible(!visible)
+      setVisible(!visible);
     }
   
     return (

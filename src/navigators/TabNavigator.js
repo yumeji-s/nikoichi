@@ -221,7 +221,7 @@ const TabNavigator = () => {
   // 初回登録した人
   if(auth.currentUser.metadata.creationTime == auth.currentUser.metadata.lastSignInTime){
     // プロフィール登録
-    console.log("profile");
+    console.log(auth.currentUser.metadata.creationTime);
   }
 
   return (
