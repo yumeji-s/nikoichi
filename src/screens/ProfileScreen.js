@@ -1,7 +1,7 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { View, Text, StyleSheet, Image } from 'react-native';
 import { Avatar } from 'react-native-elements';
-import { Button, NativeBaseProvider } from 'native-base'; 
+import { Button, NativeBaseProvider, ScrollView } from 'native-base'; 
 import { useNavigation } from '@react-navigation/native';
 import Constants from 'expo-constants';
 import * as ImagePicker from 'expo-image-picker';
@@ -12,6 +12,7 @@ import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 
 import { auth, firestore, storage } from '../../firebase';
 import { LoadingScreen } from './LoadingScreen';
+import { ProfileList } from '../components/ProfileList';
 
 const ProfileScreen = () => {
   
@@ -30,8 +31,7 @@ const ProfileScreen = () => {
       setIconUpdateAt(snapShot.data().updateAt);
     }
     setUser({
-      name: snapShot.data().name,
-      imgURL: snapShot.data().imgURL,
+      ...snapShot.data(),
     });
     setLoading(false);
   },[]);
@@ -101,19 +101,26 @@ const ProfileScreen = () => {
   return (
     <NativeBaseProvider>
       <View style={styles.root}>
-        <View style={styles.actionBar}>
-          <Text>{auth.currentUser.uid}</Text>
-          <Button style={styles.button} onPress={handleLogout}>ログアウト</Button>
-        </View>
-        <View alignSelf="center">
-          {icon && <Avatar rounded size="xlarge" source={{uri: icon}} activeOpacity={0.7} key={icon} onPress={pickImage}>
-            <Avatar.Accessory size={50} onPress={pickImage} />
-          </Avatar>}
-          {!icon && <Avatar rounded size="xlarge" icon={{name: 'user', color: 'white', type: 'font-awesome'}}
-              containerStyle={{backgroundColor: "gray"}} activeOpacity={0.7} key={icon} onPress={pickImage}>
-            <Avatar.Accessory size={50} onPress={pickImage} />
-          </Avatar>}
-        </View>
+        <ScrollView h="80" _contentContainerStyle={{
+          px: "20px",
+          mb: "4",
+          minW: "72"
+        }}>
+          <View style={styles.actionBar}>
+            <Text>{user.name}</Text>
+            <Button style={styles.button} onPress={handleLogout}>ログアウト</Button>
+          </View>
+          <View alignSelf="center">
+            {icon && <Avatar rounded size="xlarge" source={{uri: icon}} activeOpacity={0.7} key={icon} onPress={pickImage}>
+              <Avatar.Accessory size={50} onPress={pickImage} />
+            </Avatar>}
+            {!icon && <Avatar rounded size="xlarge" icon={{name: 'user', color: 'white', type: 'font-awesome'}}
+                containerStyle={{backgroundColor: "gray"}} activeOpacity={0.7} key={icon} onPress={pickImage}>
+              <Avatar.Accessory size={50} onPress={pickImage} />
+            </Avatar>}
+          </View>
+          <ProfileList user={user} />
+        </ScrollView>
       </View>
     </NativeBaseProvider>
   );

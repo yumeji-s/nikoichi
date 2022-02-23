@@ -37,6 +37,7 @@ const LoginScreen = () => {
     >
       <Text style={{ fontSize: 20, marginBottom: 20 }}>ログイン画面</Text>
       <View style={{ marginBottom: 20 }}>
+        <Text>メール</Text>
         <TextInput
           style={{
             width: 250,
@@ -52,6 +53,7 @@ const LoginScreen = () => {
         />
       </View>
       <View style={{ marginBottom: 20 }}>
+        <Text>パスワード</Text>
         <TextInput
           style={{
             width: 250,

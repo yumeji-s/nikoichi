@@ -105,7 +105,7 @@ const ProfileNavigator = () => (
       name="Main"
       component={ProfileScreen}
       options={{
-        headerTitle: 'プロフィール',
+        headerTitle: 'マイページ',
         headerBackTitleVisible: false,
         headerTitleAlign: 'center',
       }}
@@ -143,7 +143,7 @@ const userTabs = () => {
 
 const chatTabs = () => {
   return (
-    <userTab.Navigator
+    <chatTab.Navigator
       initialRouteName="chatRooms"
       screenOptions={({ route }) => ({
         "tabBarStyle": [
@@ -154,9 +154,9 @@ const chatTabs = () => {
         ]
       })}
     >
-      <userTab.Screen name="matchUser" options={{ tabBarLabel: 'マッチした人' }} component={MatchUserStackNavigator} />
-      <userTab.Screen name="chatRooms" options={{ tabBarLabel: 'メッセージ' }} component={ChatStackNavigator} />
-    </userTab.Navigator>
+      <chatTab.Screen name="matchUser" options={{ tabBarLabel: 'マッチした人' }} component={MatchUserStackNavigator} />
+      <chatTab.Screen name="chatRooms" options={{ tabBarLabel: 'メッセージ' }} component={ChatStackNavigator} />
+    </chatTab.Navigator>
   );
 }
 

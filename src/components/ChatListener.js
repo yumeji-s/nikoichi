@@ -82,5 +82,34 @@ const useInfiniteSnapshotListener = (chatRoom) => {
 };
 
 
+const messageListener = async(chatRoom) => {
 
-export { useInfiniteSnapshotListener };
+    let messages;
+    const messageRef = collection(firestore, `chat/${user.chatRoom}/messages`);
+      const q = query(messageRef, orderBy("createdAt","desc"), limit(1));
+      const unsubscribe = await onSnapshot(q, (snapshot) => {
+        const targets = snapshot.docs.map((doc) => {
+          return {...doc.data()};
+        });
+        if(targets.length == 0){
+          user.messages = {
+            _id: "",
+            createdAt: "",
+            text: "",
+            user: {
+              _id: "",
+              avatar: "",
+              name: "",
+            }
+          }
+        }else{
+          console.log(targets);
+          user.messages = targets;
+        }
+      });
+    return messages;
+}
+
+
+
+export { useInfiniteSnapshotListener, messageListener };
