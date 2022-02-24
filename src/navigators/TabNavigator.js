@@ -33,7 +33,7 @@ const HomeStackNavigator = () => (
   </Stack.Navigator>
 )
 
-const fromPartnerStackNavigator = () => (
+const FromPartnerStackNavigator = () => (
   <Stack.Navigator initialRouteName="Home">
     <Stack.Screen
       name="Home"
@@ -108,6 +108,9 @@ const ProfileNavigator = () => (
         headerTitle: 'マイページ',
         headerBackTitleVisible: false,
         headerTitleAlign: 'center',
+        headerRight: () => (
+          <Ionicons name="settings-outline" size={24} onPress={() => {console.log("設定ボタンだよ")}} />// 設定ボタン押したらモーダル開かせる
+        ),
       }}
     />
   </Stack.Navigator>
@@ -119,12 +122,12 @@ const ProfileNavigator = () => (
 
 // 親タブ
 const ParentTab = createBottomTabNavigator()
-const userTab = createMaterialTopTabNavigator();
-const chatTab = createMaterialTopTabNavigator();
+const UserTab = createMaterialTopTabNavigator();
+const ChatTab = createMaterialTopTabNavigator();
 
-const userTabs = () => {
+const UserTabs = () => {
   return (
-    <userTab.Navigator
+    <UserTab.Navigator
       initialRouteName="bestUser"
       screenOptions={({ route }) => ({
         "tabBarStyle": [
@@ -135,15 +138,15 @@ const userTabs = () => {
         ]
       })}
     >
-      <userTab.Screen name="bestUser" options={{ tabBarLabel: 'おすすめ' }} component={HomeStackNavigator} />
-      <userTab.Screen name="fromPartner" options={{ tabBarLabel: '相手から' }} component={fromPartnerStackNavigator} />
-    </userTab.Navigator>
+      <UserTab.Screen name="bestUser" options={{ tabBarLabel: 'おすすめ' }} component={HomeStackNavigator} />
+      <UserTab.Screen name="fromPartner" options={{ tabBarLabel: '相手から' }} component={FromPartnerStackNavigator} />
+    </UserTab.Navigator>
   );
 }
 
-const chatTabs = () => {
+const ChatTabs = () => {
   return (
-    <chatTab.Navigator
+    <ChatTab.Navigator
       initialRouteName="chatRooms"
       screenOptions={({ route }) => ({
         "tabBarStyle": [
@@ -154,9 +157,9 @@ const chatTabs = () => {
         ]
       })}
     >
-      <chatTab.Screen name="matchUser" options={{ tabBarLabel: 'マッチした人' }} component={MatchUserStackNavigator} />
-      <chatTab.Screen name="chatRooms" options={{ tabBarLabel: 'メッセージ' }} component={ChatStackNavigator} />
-    </chatTab.Navigator>
+      <ChatTab.Screen name="matchUser" options={{ tabBarLabel: 'マッチした人' }} component={MatchUserStackNavigator} />
+      <ChatTab.Screen name="chatRooms" options={{ tabBarLabel: 'メッセージ' }} component={ChatStackNavigator} />
+    </ChatTab.Navigator>
   );
 }
 
@@ -250,9 +253,9 @@ const TabNavigator = () => {
         ]
       })}
     >
-      <ParentTab.Screen name="bestUsersTab" component={userTabs} />
+      <ParentTab.Screen name="bestUsersTab" component={UserTabs} />
       <ParentTab.Screen name="SearchTab" component={SearchStackNavigator} />
-      <ParentTab.Screen name="ChatTab" component={chatTabs} />
+      <ParentTab.Screen name="ChatTab" component={ChatTabs} />
       <ParentTab.Screen name="ProfTab" component={ProfileNavigator} />
     </ParentTab.Navigator>
   )

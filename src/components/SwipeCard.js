@@ -103,8 +103,7 @@ const Deck = ({ data }) => {
     return (
       <>
         {index >= data.length && <RenderNoMoreCards />}
-        {data
-          .map((item, i) => {
+        {data.map((item, i) => {
             if (i < index) {
               return null;
             }
