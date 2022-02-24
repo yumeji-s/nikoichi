@@ -132,7 +132,7 @@ const Deck = ({ data }) => {
             return (
               <Animated.View
                 key={item.uid}
-                style={[styles.cardStyle, { top: 10 * (i - index) }]}
+                style={[styles.cardStyle, { top: 0 }]}
               >
                 <RenderCards item={item} />
               </Animated.View>
@@ -188,7 +188,8 @@ const Deck = ({ data }) => {
     },
     textStyle: {
       marginBottom: 10,
-      fontSize: 16
+      fontSize: 16,
+      height: 20
     },
     buttonStyle: {
       borderRadius: 50,

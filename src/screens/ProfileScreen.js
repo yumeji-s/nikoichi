@@ -12,7 +12,7 @@ import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 
 import { auth, firestore, storage } from '../../firebase';
 import { LoadingScreen } from './LoadingScreen';
-import { ProfileList } from '../components/ProfileList';
+import { ProfileList, Introduction } from '../components/ProfileList';
 
 const ProfileScreen = () => {
   
@@ -119,7 +119,10 @@ const ProfileScreen = () => {
               <Avatar.Accessory size={50} onPress={pickImage} />
             </Avatar>}
           </View>
-          <ProfileList user={user} />
+          <View>
+            <Introduction introduction={user.introduction} />
+            <ProfileList user={user} />
+          </View>
         </ScrollView>
       </View>
     </NativeBaseProvider>

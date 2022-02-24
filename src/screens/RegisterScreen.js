@@ -194,12 +194,12 @@ const RegisterScreen = () => {
     const todayDate = new Date();
   
     //誕生日を計算する
-    const userAge = todayDate.getFullYear() - birth.getFullYear();
+    let userAge = todayDate.getFullYear() - birth.getFullYear();
   
     //誕生日が当年込みの計算のため、もし今年の誕生日を迎えていない場合は1歳年齢を減らす
     const currentYearDate = new Date(todayDate.getFullYear(), birth.getMonth(), birth.getDate());
     if(currentYearDate > todayDate) {
-      userAge = ( userAge - 1 );
+      userAge = (userAge - 1);
     }
     return userAge;
   }

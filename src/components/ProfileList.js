@@ -1,65 +1,106 @@
-import React from 'react';
-import { Pressable, StyleSheet } from 'react-native';
-import { Box, VStack, HStack, Text, Icon  } from 'native-base'; 
-import Ionicons from 'react-native-vector-icons/Ionicons';
-import * as mySelect from '../components/ProfileSelect';
+import React, { useState } from 'react';
+import { Box, Button, Input, FormControl, Modal, VStack, HStack, Text, TextArea } from 'native-base';
+import { getSelect, updateProfile } from '../components/ProfileSelect';
 
 // itemをまとめておく
 const Section = ( {title, children} ) => {
   return (
-    <VStack space={4} paddingY={4}>   
-      {title && (
-        <HStack paddingX={4} alignSelf="center">
-          <Text fontSize="md" bold color="gray.500">
-            {title}
-          </Text>
-        </HStack>
-      )}
+    <VStack space={4} paddingY={4}>
+
+      <HStack paddingX={4}>
+        <Text fontSize="xl" bold color="gray.500">
+          {title}
+        </Text>
+      </HStack>
       
       <VStack borderRadius={10} backgroundColor="white">
         {children}
       </VStack>
     </VStack>
   );
- };
+};
 
 // 一つ一つの項目
-const Item = ( {title, right, arrow = true, user} ) => {
+const Item = ( {title, select} ) => {
   return (
-    <Box >
-      <HStack
-        paddingLeft={4}
-        paddingRight={0}
-        paddingY={5}
-        alignItems="center"
-        justifyContent="space-between">
-        
-        <VStack>
-          {title && (
-            <Text fontSize="md" bold color="black">
-              {title}
-            </Text>
-          )}
-        </VStack>
-        
-        <HStack space={0} paddingLeft={0} paddingRight={4}>
-          
-          {right}
+    <HStack
+      paddingLeft={4}
+      paddingRight={0}
+      paddingY={5}
+      alignItems="center"
+      justifyContent='flex-start'>
+      
+      <VStack style={{width: '15%'}}>
+        <Text fontSize='lg' bold color='#999' noOfLines={2}>
+          {title}
+        </Text>
+      </VStack>
+      <Box style={{width: '85%'}}>
+        {select}
+      </Box>
 
-          {arrow && (
-            <Icon
-              alignSelf="center"
-              size="md"
-              as={<Ionicons name="chevron-forward" />}
-              textAlign="right"
-            />
-          )}
-        </HStack>        
-      </HStack>
-      {right}
-    </Box>
+    </HStack>
   );
 };
+
+// 自己紹介文
+export const Introduction = ( {introduction} ) => {
+  const [showModal, setShowModal] = useState(false);
+  const [value, setValue] = useState(introduction);
+  const [originIntroduction, setOriginIntroduction] = useState(value);
+
+  const handleChange = text => {setValue(text)};
+  return (
+    <VStack space={4} paddingY={4}>   
+
+      <HStack paddingX={4}>
+        <Text fontSize="xl" bold color="gray.500">
+          自己紹介
+        </Text>
+      </HStack>
+
+      <HStack>
+        <Text fontSize="lg" bold color="gray.500" w="100%" lineHeight="50" bg="white" paddingLeft={5} borderRadius={5} noOfLines={1} onPress={() => setShowModal(!showModal)}>
+          {value != '' ? value : '自己紹介文を入力しましょう'}
+        </Text>
+      </HStack>
+
+      <Modal isOpen={showModal} onClose={() => setShowModal(false)}>
+        <Modal.Content>
+          <Modal.CloseButton />
+          <Modal.Header>自己紹介</Modal.Header>
+          <Modal.Body>
+            <FormControl>
+              <TextArea variant='unstyled'
+                placeholder={introduction != '' ? introduction : '【記載する具体例】\n・趣味や休日にしていることは？\n・仕事の内容は？\n・どんな性格？'}
+                value={value} onChangeText={handleChange}
+              />
+            </FormControl>
+          </Modal.Body>
+          <Modal.Footer>
+            <Button.Group space={2}>
+              <Button variant="ghost" colorScheme='blueGray' onPress={() => {
+                setValue(originIntroduction);
+                setShowModal(false);
+              }}>
+                キャンセル
+              </Button>
+              <Button onPress={() => {
+                updateProfile('introduction',value);
+                setOriginIntroduction(value);
+                setShowModal(false);
+              }}>
+                保存
+              </Button>
+            </Button.Group>
+          </Modal.Footer>
+        </Modal.Content>
+      </Modal>
+    </VStack>
+  );
+}
+
+
 
 
 // 引数のuserにプロフィール情報をすべて入れておく、なかったら "タップして設定" を入れる
@@ -69,122 +110,104 @@ const Item = ( {title, right, arrow = true, user} ) => {
 
 const ProfileList = ( {user} ) => {
   const items = [
-    // {
-    //   title: "年齢",
-    //   right: user.age,
-    //   arrow: false,
-    //   func: mySelect.noTouch,
-    // },
     {
-      title: "居住地",
-      right: mySelect.addressSelect,
-      arrow: true,
+      key: 'age',
+      title: '年齢',
+      val: user.age,
     },
-    // {
-    //   title: "勤務地",
-    //   right: user.workplace,
-    //   arrow: true,
-    //   func: noTouch,
-    // },
-    // {
-    //   title: "出身地",
-    //   right: user.birthplace,
-    //   arrow: true,
-    //   func: noTouch,
-    // },
-    // {
-    //   title: "血液型",
-    //   right: user.bloodtype,
-    //   arrow: true,
-    //   func: noTouch,
-    // },
-    // {
-    //   title: "身長",
-    //   right: user.height,
-    //   arrow: true,
-    //   func: noTouch,
-    // },
-    // {
-    //   title: "体型",
-    //   right: user.body,
-    //   arrow: true,
-    //   func: noTouch,
-    // },
-    // {
-    //   title: "学歴",
-    //   right: user.background,
-    //   arrow: true,
-    //   func: noTouch,
-    // },
-    // {
-    //   title: "年収",
-    //   right: user.income,
-    //   arrow: true,
-    //   func: noTouch,
-    // },
-    // {
-    //   title: "仕事",
-    //   right: user.job,
-    //   arrow: true,
-    //   func: noTouch,
-    // },
-    // {
-    //   title: "休日",
-    //   right: user.holiday,
-    //   arrow: true,
-    //   func: noTouch,
-    // },
-    // {
-    //   title: "結婚歴",
-    //   right: user.marriagehistory,
-    //   arrow: true,
-    //   func: noTouch,
-    // },
-    // {
-    //   title: "子供の有無",
-    //   right: user.children,
-    //   arrow: true,
-    //   func: noTouch,
-    // },
-    // {
-    //   title: "煙草",
-    //   right: user.cigarette,
-    //   arrow: true,
-    //   func: noTouch,
-    // },
-    // {
-    //   title: "お酒",
-    //   right: user.alcohol,
-    //   arrow: true,
-    //   func: noTouch,
-    // },
-    // {
-    //   title: "一緒に住んでいる人",
-    //   right: user.housemate,
-    //   arrow: true,
-    //   func: noTouch,
-    // },
-    // {
-    //   title: "出会うまでの希望",
-    //   right: user.meet,
-    //   arrow: true,
-    //   func: noTouch,
-    // },
-    // {
-    //   title: "初回デート費用",
-    //   right: user.datecost,
-    //   arrow: true,
-    //   func: noTouch,
-    // },
-    // {
-    //   title: "結婚に対する意思",
-    //   right: user.marriage,
-    //   arrow: true,
-    //   func: noTouch,
-    // },
+    {
+      key: 'address',
+      title: '居住地',
+      val: user.address,
+    },
+    {
+      key: 'workplace',
+      title: '勤務地',
+      val: user.workplace,
+    },
+    {
+      key: 'birthplace',
+      title: '出身地',
+      val: user.birthplace,
+    },
+    {
+      key: 'bloodtype',
+      title: '血液型',
+      val: user.bloodtype,
+    },
+    {
+      key: 'height',
+      title: '身長',
+      val: user.height,
+    },
+    {
+      key: 'body',
+      title: '体型',
+      val: user.body,
+    },
+    {
+      key: 'background',
+      title: '学歴',
+      val: user.background,
+    },
+    {
+      key: 'income',
+      title: '年収',
+      val: user.income,
+    },
+    {
+      key: 'job',
+      title: '仕事',
+      val: user.job,
+    },
+    {
+      key: 'holiday',
+      title: '休日',
+      val: user.holiday,
+    },
+    {
+      key: 'marriagehistory',
+      title: '結婚歴',
+      val: user.marriagehistory,
+    },
+    {
+      key: 'children',
+      title: '子供の有無',
+      val: user.children,
+    },
+    {
+      key: 'cigarette',
+      title: '煙草',
+      val: user.cigarette,
+    },
+    {
+      key: 'alcohol',
+      title: 'お酒',
+      val: user.alcohol,
+    },
+    {
+      key: 'housemate',
+      title: '一緒に住んでいる人',
+      val: user.housemate,
+    },
+    {
+      key: 'meet',
+      title: '出会うまでの希望',
+      val: user.meet,
+    },
+    {
+      key: 'datecost',
+      title: '初回デート費用',
+      val: user.datecost,
+    },
+    {
+      key: 'marriage',
+      title: '結婚に対する意思',
+      val: user.marriage,
+    },
   ];
   const children = items.map((item, index) => (
-    <Item key={index} title={item.title} right={item.right(user)} arrow={item.arrow} />
+    <Item key={index} title={item.title} select={getSelect(item.key, item.val)} />
   ));
   return (
     <Box>
