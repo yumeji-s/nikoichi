@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Box, Button, Input, FormControl, Modal, VStack, HStack, Text, TextArea } from 'native-base';
+import { Box, Button, Input, FormControl, Modal, VStack, HStack, Text, TextArea, ScrollView } from 'native-base';
 import { getSelect, updateProfile } from '../components/ProfileSelect';
 
 // itemをまとめておく
@@ -49,12 +49,28 @@ export const Introduction = ( {introduction} ) => {
   const [value, setValue] = useState(introduction);
   const [originIntroduction, setOriginIntroduction] = useState(value);
 
-  const handleChange = text => {setValue(text)};
+  const handleChange = text => {
+    // 1000文字を超えたらアラート
+    if(text.length > 1000){
+      return;
+    }
+    setValue(text);
+  };
+  const cancelText = () => {
+    setValue(originIntroduction);
+    setShowModal(false);
+  };
+  const saveText = () => {
+    updateProfile('introduction',value);
+    setOriginIntroduction(value);
+    setShowModal(false);
+  };
+
   return (
     <VStack space={4} paddingY={4}>   
 
       <HStack paddingX={4}>
-        <Text fontSize="xl" bold color="gray.500">
+        <Text fontSize="2xl" bold color="gray.500">
           自己紹介
         </Text>
       </HStack>
@@ -65,31 +81,25 @@ export const Introduction = ( {introduction} ) => {
         </Text>
       </HStack>
 
-      <Modal isOpen={showModal} onClose={() => setShowModal(false)}>
-        <Modal.Content>
+      <Modal isOpen={showModal} onClose={() => cancelText()} size="full">
+        <Modal.Content size="full">
           <Modal.CloseButton />
           <Modal.Header>自己紹介</Modal.Header>
-          <Modal.Body>
-            <FormControl>
-              <TextArea variant='unstyled'
-                placeholder={introduction != '' ? introduction : '【記載する具体例】\n・趣味や休日にしていることは？\n・仕事の内容は？\n・どんな性格？'}
+          <Modal.Body size="full" bgColor="amber.400">
+            <ScrollView>
+              <TextArea variant='unstyled' size="full" minH="1300" fontSize="xl" bgColor="amber.100"
+                placeholder={value != '' ? value : '【記載する具体例】\n・趣味や休日にしていることは？\n・仕事の内容は？\n・どんな性格？'}
                 value={value} onChangeText={handleChange}
               />
-            </FormControl>
+            </ScrollView>
           </Modal.Body>
-          <Modal.Footer>
+          <Modal.Footer w="100%">
+            <Text lineHeight="35">{value.length}文字／1000文字</Text>
             <Button.Group space={2}>
-              <Button variant="ghost" colorScheme='blueGray' onPress={() => {
-                setValue(originIntroduction);
-                setShowModal(false);
-              }}>
+              <Button variant="ghost" colorScheme='blueGray' onPress={() => cancelText()}>
                 キャンセル
               </Button>
-              <Button onPress={() => {
-                updateProfile('introduction',value);
-                setOriginIntroduction(value);
-                setShowModal(false);
-              }}>
+              <Button onPress={() => saveText()}>
                 保存
               </Button>
             </Button.Group>
@@ -99,6 +109,8 @@ export const Introduction = ( {introduction} ) => {
     </VStack>
   );
 }
+
+
 
 
 

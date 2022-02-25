@@ -247,7 +247,7 @@ const TabNavigator = () => {
         "tabBarShowLabel": false,
         "tabBarStyle": [
           {
-            "display": "flex"
+            "display": "flex",
           },
           null
         ]

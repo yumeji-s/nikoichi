@@ -28,7 +28,7 @@ const LoginScreen = () => {
 
   return (
     <KeyboardAvoidingView
-      behavior="padding"
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
       style={{
         justifyContent: 'center',
         alignItems: 'center',

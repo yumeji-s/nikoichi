@@ -16,7 +16,6 @@ import { ProfileList, Introduction } from '../components/ProfileList';
 
 const ProfileScreen = () => {
   
-  const navigation = useNavigation();
   const [user, setUser] = useState();
   const [icon, setIcon] = useState(null);
   const [iconUpdateAt, setIconUpdateAt] = useState(null);
