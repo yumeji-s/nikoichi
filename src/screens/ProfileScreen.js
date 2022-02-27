@@ -1,7 +1,7 @@
 import React, { useState, useCallback, useEffect } from 'react';
-import { View, Text, StyleSheet, Image } from 'react-native';
+import { View, StyleSheet, Image } from 'react-native';
 import { Avatar } from 'react-native-elements';
-import { Button, NativeBaseProvider, ScrollView } from 'native-base'; 
+import { Button, NativeBaseProvider, ScrollView, Text } from 'native-base'; 
 import { useNavigation } from '@react-navigation/native';
 import Constants from 'expo-constants';
 import * as ImagePicker from 'expo-image-picker';
@@ -35,15 +35,7 @@ const ProfileScreen = () => {
     setLoading(false);
   },[]);
 
-  const handleLogout = () => {
-    signOut(auth)
-      .then(() => {
-        console.log('logout');
-      })
-      .catch((error) => {
-        console.log(error.message);
-      });
-  };
+  
 
   const pickImage = async () => {
 
@@ -105,9 +97,8 @@ const ProfileScreen = () => {
           mb: "4",
           minW: "72"
         }}>
-          <View style={styles.actionBar}>
-            <Text>{user.name}</Text>
-            <Button style={styles.button} onPress={handleLogout}>ログアウト</Button>
+          <View style={styles.userName}>
+            <Text fontSize='2xl'>{user.name}</Text>
           </View>
           <View alignSelf="center">
             {icon && <Avatar rounded size="xlarge" source={{uri: icon}} activeOpacity={0.7} key={icon} onPress={pickImage}>
@@ -134,10 +125,10 @@ const styles = StyleSheet.create({
     display: 'flex',
     alignContent: 'center',
   },
-  actionBar: {
+  userName: {
     display: 'flex',
     flexDirection: 'row',
-    justifyContent: 'flex-end',
+    justifyContent: 'center',
     padding: 12,
   },
   button: {

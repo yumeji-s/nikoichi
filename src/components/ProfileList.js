@@ -30,12 +30,12 @@ const Item = ( {title, select} ) => {
       alignItems="center"
       justifyContent='flex-start'>
       
-      <VStack style={{width: '15%'}}>
-        <Text fontSize='lg' bold color='#999' noOfLines={2}>
+      <VStack style={{width: '20%'}}>
+        <Text fontSize='sm' bold color='#999' noOfLines={2}>
           {title}
         </Text>
       </VStack>
-      <Box style={{width: '85%'}}>
+      <Box style={{width: '80%'}}>
         {select}
       </Box>
 

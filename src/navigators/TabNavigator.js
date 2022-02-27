@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react'
+import { StyleSheet } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons'
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
@@ -16,6 +17,7 @@ import { LoginScreen } from '../screens/LoginScreen'
 import { RegisterScreen } from '../screens/RegisterScreen'
 import { LoadingScreen } from '../screens/LoadingScreen'
 import { auth } from '../../firebase'
+import { ProfileSettings } from '../components/ProfileSettings'
 
 const Stack = createStackNavigator()
 
@@ -25,7 +27,6 @@ const HomeStackNavigator = () => (
       name="Home"
       component={SwipeScreen}
       options={{
-        headerTitle: 'メイン',
         headerBackTitleVisible: false,
         headerShown: false,
       }}
@@ -39,7 +40,6 @@ const FromPartnerStackNavigator = () => (
       name="Home"
       component={FromPartnerScreen}
       options={{
-        headerTitle: 'メイン',
         headerBackTitleVisible: false,
         headerShown: false,
       }}
@@ -53,10 +53,8 @@ const MatchUserStackNavigator = () => (
       name="Main"
       component={MatchUserTabScreen}
       options={{
-        headerTitle: 'やりとり',
         headerBackTitleVisible: false,
-        headerTitleAlign: 'center',
-        // headerShown: false,
+        headerShown: false,
       }}
     />
   </Stack.Navigator>
@@ -68,10 +66,8 @@ const ChatStackNavigator = () => (
       name="Main"
       component={ChatTabScreen}
       options={{
-        headerTitle: 'やりとり',
         headerBackTitleVisible: false,
-        headerTitleAlign: 'center',
-        // headerShown: false,
+        headerShown: false,
       }}
     />
     <Stack.Screen
@@ -93,7 +89,14 @@ const SearchStackNavigator = () => (
       component={SearchTabScreen}
       options={{
         headerBackTitleVisible: false,
-        headerShown: false,
+        headerTitleAlign: 'center',
+        headerTitle: '',
+        headerTitleStyle: {
+          fontWeight: 'bold',
+        },
+        headerStyle: {
+          height: 30,
+        },
       }}
     />
   </Stack.Navigator>
@@ -108,9 +111,18 @@ const ProfileNavigator = () => (
         headerTitle: 'マイページ',
         headerBackTitleVisible: false,
         headerTitleAlign: 'center',
+        headerStyle: {
+          height: 70,
+        },
         headerRight: () => (
-          <Ionicons name="settings-outline" size={24} onPress={() => {console.log("設定ボタンだよ")}} />// 設定ボタン押したらモーダル開かせる
+          <ProfileSettings />
         ),
+        headerRightContainerStyle: {
+          alignItems: 'flex-end',
+          paddingTop: 10,
+          paddingRight: 10,
+        }
+        
       }}
     />
   </Stack.Navigator>
@@ -121,32 +133,54 @@ const ProfileNavigator = () => (
 
 
 // 親タブ
-const ParentTab = createBottomTabNavigator()
-const UserTab = createMaterialTopTabNavigator();
-const ChatTab = createMaterialTopTabNavigator();
+const ParentTab = createBottomTabNavigator();
+const ChildTab = createMaterialTopTabNavigator();
 
 const UserTabs = () => {
   return (
-    <UserTab.Navigator
+    <ChildTab.Navigator
       initialRouteName="bestUser"
       screenOptions={({ route }) => ({
         "tabBarStyle": [
           {
-            "display": "flex"
+            "display": "flex",
           },
           null
         ]
       })}
     >
-      <UserTab.Screen name="bestUser" options={{ tabBarLabel: 'おすすめ' }} component={HomeStackNavigator} />
-      <UserTab.Screen name="fromPartner" options={{ tabBarLabel: '相手から' }} component={FromPartnerStackNavigator} />
-    </UserTab.Navigator>
+      <ChildTab.Screen name="bestUser" options={{ tabBarLabel: 'おすすめ' }} component={HomeStackNavigator} />
+      <ChildTab.Screen name="fromPartner" options={{ tabBarLabel: '相手から' }} component={FromPartnerStackNavigator} />
+    </ChildTab.Navigator>
   );
 }
 
+const UserStackNavigator = () => (
+  <Stack.Navigator initialRouteName="Main">
+    <Stack.Screen
+      name="Main"
+      component={UserTabs}
+      options={
+        {
+          headerBackTitleVisible: false,
+          headerTitleAlign: 'center',
+          headerTitle: '',
+          headerTitleStyle: {
+            fontWeight: 'bold',
+          },
+          headerStyle: {
+            height: 30,
+          },
+        }
+        
+      }
+    />
+  </Stack.Navigator>
+)
+
 const ChatTabs = () => {
   return (
-    <ChatTab.Navigator
+    <ChildTab.Navigator
       initialRouteName="chatRooms"
       screenOptions={({ route }) => ({
         "tabBarStyle": [
@@ -157,11 +191,28 @@ const ChatTabs = () => {
         ]
       })}
     >
-      <ChatTab.Screen name="matchUser" options={{ tabBarLabel: 'マッチした人' }} component={MatchUserStackNavigator} />
-      <ChatTab.Screen name="chatRooms" options={{ tabBarLabel: 'メッセージ' }} component={ChatStackNavigator} />
-    </ChatTab.Navigator>
+      <ChildTab.Screen name="matchUser" options={{ tabBarLabel: 'マッチした人' }} component={MatchUserStackNavigator} />
+      <ChildTab.Screen name="chatRooms" options={{ tabBarLabel: 'メッセージ' }} component={ChatStackNavigator} />
+    </ChildTab.Navigator>
   );
 }
+
+const ChatNavigator = () => (
+  <Stack.Navigator initialRouteName="Main">
+    <Stack.Screen
+      name="Main"
+      component={ChatTabs}
+      options={{
+        headerTitle: 'やりとり',
+        headerBackTitleVisible: false,
+        headerTitleAlign: 'center',
+        headerStyle: {
+          height: 70,
+        },
+      }}
+    />
+  </Stack.Navigator>
+)
 
 const userInfo = () => {
   const [user, setUser] = useState(null)
@@ -234,13 +285,13 @@ const TabNavigator = () => {
         tabBarIcon: ({ focused, color, size }) => {
           switch(route.name){
             case 'bestUsersTab':
-              return <Ionicons name="home" size={24} />
+              return focused ? <Ionicons name="home" size={24} /> : <Ionicons name="home-outline" size={24} />;
             case 'SearchTab':
-              return <Ionicons name="ios-compass-outline" size={24} />
+              return focused ? <Ionicons name="compass" size={24} /> : <Ionicons name="compass-outline" size={24} />;
             case 'ChatTab':
-              return <Ionicons name="chatbubble-ellipses-outline" size={24} />
+              return focused ? <Ionicons name="chatbubble-ellipses" size={24} /> : <Ionicons name="chatbubble-ellipses-outline" size={24} />;
             case 'ProfTab':
-              return <Ionicons name="person-circle-outline" size={24} />
+              return focused ? <Ionicons name="person-circle" size={24} /> : <Ionicons name="person-circle-outline" size={24} />;
           }
         },
         "headerShown": false,
@@ -253,12 +304,13 @@ const TabNavigator = () => {
         ]
       })}
     >
-      <ParentTab.Screen name="bestUsersTab" component={UserTabs} />
+      <ParentTab.Screen name="bestUsersTab" component={UserStackNavigator} />
       <ParentTab.Screen name="SearchTab" component={SearchStackNavigator} />
-      <ParentTab.Screen name="ChatTab" component={ChatTabs} />
+      <ParentTab.Screen name="ChatTab" component={ChatNavigator} />
       <ParentTab.Screen name="ProfTab" component={ProfileNavigator} />
     </ParentTab.Navigator>
   )
 }
+
 
 export { TabNavigator }
