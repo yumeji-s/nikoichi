@@ -1,7 +1,8 @@
 import React, { useCallback, useState, useEffect, useRef } from 'react';
-import { StyleSheet, View, TouchableOpacity, Text, StatusBar } from 'react-native';
+import { StyleSheet, TouchableOpacity, StatusBar, Dimensions } from 'react-native';
 import { Overlay } from 'react-native-elements';
 import { GiftedChat } from 'react-native-gifted-chat';
+import { View, Text, NativeBaseProvider, Modal } from 'native-base'; 
 import 'dayjs/locale/ja';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { addDoc, doc, setDoc, getDoc, getDocs, updateDoc, collection, query, where, limit, onSnapshot, orderBy, startAfter } from 'firebase/firestore';
@@ -21,9 +22,16 @@ const ChatRoomScreen = ({ route, navigation }) => {
   // const [messages, setMessages] = useState([]);                           // 全メッセージ
   const [currentUser, setCurrentUser] = useState([]);                     // ログインしているユーザ
   const [sentinel, setSentinel] = useState();                             // 最後のメッセージのid
-  const { chatRoom } = route.params;                                      // チャットルーム名
+  const { chatRoom, name } = route.params;                                      // チャットルーム名、チャット相手の名前
   const messageRef = collection(firestore, `chat/${chatRoom}/messages`);  // メッセージ登録用
   const { messages, readMore, initRead } = useInfiniteSnapshotListener(chatRoom);
+
+  const [showModal, setShowModal] = useState(true);
+
+  const close = () => {
+    setShowModal(false);
+    navigation.goBack();
+  }
   
   useEffect(async () => {
     // 最初のレンダリング時に自分の情報を取得
@@ -60,47 +68,50 @@ const ChatRoomScreen = ({ route, navigation }) => {
   };
 
   return (
-      <View style={styles.container}>
-          <Header navigation={navigation}></Header>
-      
-          <GiftedChat
-              messages={messages}
-              onSend={(messages) => onSend(messages)}
-              user={{
-                  _id: currentUser.uid,
-                  name: currentUser.name,
-                  avatar: currentUser.imgURL
-              }}
-              locale='ja'
-              placeholder='メッセージを入力'
-              keyboardShouldPersistTaps='never'
-              timeFormat='H:mm'
-              onPressAvatar={console.log}
-              containerStyle={styles.sendArea}
-              textInputStyle={styles.sendInput}
-              alignTop={true}
-              alwaysShowSend={true}
-              infiniteScroll={true}
-              // loadEarlier={isLoadingEarlier}
-              isLoadingEarlier={hasMore}
-              listViewProps={{
-                  onEndReached: readMore(),
-                  onEndReachedThreshold: 0.4,
-              }}
-              renderInputToolbar={renderInputToolbar}
-              renderActions={renderActions}
-              renderComposer={renderComposer}
-              renderSend={renderSend}
-              messagesContainerStyle={{ backgroundColor: '#eee8aa' }}
-              parsePatterns={(linkStyle) => [
-                {
-                pattern: /#(\w+)/,
-                style: linkStyle,
-                onPress: (tag) => console.log(`Pressed on hashtag: ${tag}`),
-                },
-              ]}
-          />
-      </View>
+    <NativeBaseProvider>
+      <Modal isOpen={showModal} onClose={() => close()}>
+        <View style={styles.container}>
+            <Header navigation={navigation} partner={name}></Header>
+        
+            <GiftedChat
+                messages={messages}
+                onSend={(messages) => onSend(messages)}
+                user={{
+                    _id: currentUser.uid,
+                    name: currentUser.name,
+                    avatar: currentUser.imgURL
+                }}
+                locale='ja'
+                placeholder='メッセージを入力'
+                keyboardShouldPersistTaps='never'
+                timeFormat='H:mm'
+                onPressAvatar={console.log}
+                textInputStyle={styles.sendInput}
+                alignTop={true}
+                alwaysShowSend={true}
+                infiniteScroll={true}
+                isLoadingEarlier={hasMore}
+                loadEarlier={isLoadingEarlier}
+                listViewProps={{
+                    onEndReached: readMore(),
+                    onEndReachedThreshold: 0.4,
+                }}
+                renderInputToolbar={renderInputToolbar}
+                renderActions={renderActions}
+                renderComposer={renderComposer}
+                renderSend={renderSend}
+                messagesContainerStyle={{ backgroundColor: 'aliceblue' }}
+                parsePatterns={(linkStyle) => [
+                  {
+                  pattern: /#(\w+)/,
+                  style: linkStyle,
+                  onPress: (tag) => console.log(`Pressed on hashtag: ${tag}`),
+                  },
+                ]}
+            />
+        </View>
+      </Modal>
+    </NativeBaseProvider>
   );
 }
 
@@ -184,7 +195,7 @@ const useInfiniteSnapshotListener = (chatRoom) => {
 
 
 
-const Header = ({ navigation }) => {
+const Header = ({ navigation, partner }) => {
     const [visible, setVisible] = useState(false);
   
     const toggleOverlay = () => {
@@ -212,11 +223,11 @@ const Header = ({ navigation }) => {
             }}
           >
             <TouchableOpacity onPress={() => navigation.goBack()}>
-              <Ionicons name="arrow-back" />
+              <Ionicons name="chevron-back" size={24} />
             </TouchableOpacity>
   
-            <Text style={{ fontWeight: "normal", marginLeft: 20 }} h4>
-              Messaging
+            <Text textAlign='center' paddingLeft={4} fontSize={20} h4>
+              {partner}
             </Text>
           </View>
         </View>
@@ -233,52 +244,42 @@ const Header = ({ navigation }) => {
 
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
+  container: {
+    flex: 1,
+    width: Dimensions.get('window').width,
+    height: Dimensions.get('window').height,
+  },
+  sendInput: {
+    borderWidth: 0.5,
+    borderColor: 'gray',
+    borderRadius: 15,
+    marginRight: 10,
+    padding: 10,
+    backgroundColor: 'snow',
+  },
+  headerWrapper: {
+    shadowColor: '#888',
+    shadowOffset:{
+      width: 0,
+      height: 2,
     },
-    sendArea: {
-        backgroundColor: '#bdb76b',
-    },
-    sendInput: {
-        borderWidth: 0.5,
-        borderColor: 'gray',
-        borderRadius: 15,
-        marginRight: 10,
-        padding: 10,
-        backgroundColor: '#FFF',
-    },
-    sendButton: {
-        backgroundColor: '#F08300',
-        color: '#000',
-        padding: 10,
-        borderRadius: 10,
-        margin: 5,
-        marginLeft: 0,
-        height: 34,
-    },
-    headerWrapper: {
-        shadowColor: '#171717',
-        shadowOffset:{
-          width: 0,
-          height: 2,
-        },
-        shadowOpacity: 0.2,
-        shadowRadius: 3,
-        paddingVertical: 15,
-        backgroundColor: 'white',
-      },
-      childContainer: {
-        paddingTop: StatusBar.currentHeight,
-        paddingHorizontal: 20,
-        width: '90%',
-        marginVertical: 0,
-        marginHorizontal: 'auto',
-      },
-      flexify: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-      },
+    shadowOpacity: 0.2,
+    shadowRadius: 3,
+    paddingVertical: 15,
+    backgroundColor: 'white',
+  },
+  childContainer: {
+    // paddingTop: StatusBar.currentHeight,
+    paddingHorizontal: 20,
+    width: '90%',
+    marginVertical: 0,
+    marginHorizontal: 'auto',
+  },
+  flexify: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
 });
 
 export {ChatRoomScreen};

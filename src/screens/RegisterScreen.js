@@ -4,8 +4,9 @@ import {
   TextInput,
   TouchableOpacity,
   KeyboardAvoidingView,
+  ScrollView,
 } from 'react-native';
-import { NativeBaseProvider, Text, Icon } from 'native-base'; 
+import { NativeBaseProvider, Text, Icon,  } from 'native-base'; 
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { doc, setDoc } from 'firebase/firestore';
@@ -77,177 +78,176 @@ const RegisterScreen = () => {
   
   return (
     <NativeBaseProvider>
-      <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
-        style={{
-          justifyContent: 'center',
-          alignItems: 'center',
-          flex: 1,
-        }}
-      >
-        <Text style={{ fontSize: 20, marginBottom: 20 }}>ユーザ登録画面</Text>
-
-        <View style={{ marginBottom: 20 }}>
-          <Text>ニックネーム</Text>
-          <TextInput
-            style={{
-              width: 250,
-              borderWidth: 1,
-              padding: 5,
-              borderColor: 'gray',
-            }}
-            onChangeText={setName}
-            value={name}
-            placeholder="ユーザ名を入力してください"
-            autoCapitalize="none"
-            autoCorrect={false}
-          />
-        </View>
-
-        <View style={{ marginBottom: 20, width: 250 }}>
-          <View>
-            <Text>誕生日</Text>
-            <Text onPress={showDatepicker} style={{backgroundColor: '#dcdcdc', borderColor: '#808080'}}>{text}</Text>
-          </View>
-          {show && (
-            <DateTimePicker
-              testID="dateTimePicker"
-              value={birth}
-              mode="date"
-              display="default"
-              onChange={onChange}
-            />
-          )}
-        </View>
-
-        <View style={{ marginBottom: 20, width: 250 }}>
-          <Text alignSelf="flex-start" bgColor="amber.100">性別</Text>
-          <RNPickerSelect
-            onValueChange={(value) => { setSex(value); }}
-            placeholder={{
-              label: sex != '' ? sex : "タップして設定",
-              value: sex != '' ? sex : null,
-              color: 'black'
-            }}
-            style={{
-              inputIOS: {
-                fontSize: 20,
-                paddingVertical: 12,
-                paddingHorizontal: 10,
-                borderWidth: 1,
-                borderColor: '#000',
-                paddingRight: 30,
-                marginLeft: 30,
-                textAlign: 'left',
-              },
-              inputAndroid: {
-                fontSize: 20,
-                paddingHorizontal: 10,
-                paddingVertical: 8,
-                borderWidth: 0.5,
-                borderColor: '#000',
-                paddingRight: 50,
-                textAlign: 'left',
-              },
-              iconContainer: {
-                top: 8,
-                right: 10,
-              },
-              placeholder: {
-                color: 'black',
-                fontSize: 20,
-              },
-            }}
-            useNativeAndroidPickerStyle={false}
-            Icon={() => {
-              return (
-                <Icon
-                  size="md"
-                  as={<Ionicons name="chevron-forward" />}
-                />
-              );
-            }}
-            items={[
-              {label: '男性', value: '男性'},
-              {label: '女性', value: '女性'}
-            ]}
-          />
-        </View>
-        
-        <View style={{ marginBottom: 20 }}>
-          <Text>メール</Text>
-          <TextInput
-            style={{
-              width: 250,
-              borderWidth: 1,
-              padding: 5,
-              borderColor: 'gray',
-            }}
-            onChangeText={setEmail}
-            value={email}
-            placeholder="メールアドレスを入力してください"
-            autoCapitalize="none"
-            autoCorrect={false}
-          />
-        </View>
-
-        <View style={{ marginBottom: 20 }}>
-          <Text>パスワード</Text>
-          <TextInput
-            style={{
-              width: 250,
-              borderWidth: 1,
-              padding: 5,
-              borderColor: 'gray',
-            }}
-            onChangeText={setPassword}
-            value={password}
-            placeholder="パスワードを入力してください"
-            secureTextEntry={true}
-            autoCapitalize="none"
-          />
-        </View>
-
-        <View style={{ marginBottom: 20 }}>
-          <Text>パスワードの確認</Text>
-          <TextInput
-            style={{
-              width: 250,
-              borderWidth: 1,
-              padding: 5,
-              borderColor: 'gray',
-            }}
-            onChangeText={setCheckPassword}
-            value={checkPassword}
-            placeholder="再度パスワードを入力してください"
-            secureTextEntry={true}
-            autoCapitalize="none"
-          />
-        </View>
-
-        <View style={{ marginBottom: 20 }}>
-          <Text style={{color: 'red'}}>※全ての項目を設定しないと登録出来ません。</Text>
-        </View>
-
-        <TouchableOpacity
+      <ScrollView>
+        <KeyboardAvoidingView
+          behavior={Platform.OS === "ios" ? "padding" : null}
           style={{
-            padding: 10,
-            backgroundColor: '#88cb7f',
-            borderRadius: 10,
+            justifyContent: 'center',
+            alignItems: 'center',
+            flex: 1,
           }}
-          onPress={handleRegister}
-          disabled={!email || !password || !name || !checkPassword || !sex}
         >
-          <Text style={{ color: 'white' }}>登録する</Text>
-        </TouchableOpacity>
+          <View style={{ marginBottom: 20, paddingTop: 20 }}>
+            <Text>ニックネーム</Text>
+            <TextInput
+              style={{
+                width: 250,
+                borderWidth: 1,
+                padding: 5,
+                borderColor: 'gray',
+              }}
+              onChangeText={setName}
+              value={name}
+              placeholder="ユーザ名を入力してください"
+              autoCapitalize="none"
+              autoCorrect={false}
+            />
+          </View>
 
-        <TouchableOpacity
-          style={{ marginTop: 10 }}
-          onPress={() => navigation.navigate('Login')}
-        >
-        <Text>ログインはこちら</Text>
-        </TouchableOpacity>
-      </KeyboardAvoidingView>
+          <View style={{ marginBottom: 20, width: 250 }}>
+            <View>
+              <Text>誕生日</Text>
+              <Text onPress={showDatepicker} style={{backgroundColor: '#dcdcdc', borderColor: '#808080'}}>{text}</Text>
+            </View>
+            {show && (
+              <DateTimePicker
+                testID="dateTimePicker"
+                value={birth}
+                mode="date"
+                display="default"
+                onChange={onChange}
+              />
+            )}
+          </View>
+
+          <View style={{ marginBottom: 20, width: 250 }}>
+            <Text alignSelf="flex-start" bgColor="amber.100">性別</Text>
+            <RNPickerSelect
+              onValueChange={(value) => { setSex(value); }}
+              placeholder={{
+                label: sex != '' ? sex : "タップして設定",
+                value: sex != '' ? sex : null,
+                color: 'black'
+              }}
+              style={{
+                inputIOS: {
+                  fontSize: 20,
+                  paddingVertical: 12,
+                  paddingHorizontal: 10,
+                  borderWidth: 1,
+                  borderColor: '#000',
+                  paddingRight: 30,
+                  marginLeft: 30,
+                  textAlign: 'left',
+                },
+                inputAndroid: {
+                  fontSize: 20,
+                  paddingHorizontal: 10,
+                  paddingVertical: 8,
+                  borderWidth: 0.5,
+                  borderColor: '#000',
+                  paddingRight: 50,
+                  textAlign: 'left',
+                },
+                iconContainer: {
+                  top: 8,
+                  right: 10,
+                },
+                placeholder: {
+                  color: 'black',
+                  fontSize: 20,
+                },
+              }}
+              useNativeAndroidPickerStyle={false}
+              Icon={() => {
+                return (
+                  <Icon
+                    size="md"
+                    as={<Ionicons name="chevron-forward" />}
+                  />
+                );
+              }}
+              items={[
+                {label: '男性', value: '男性'},
+                {label: '女性', value: '女性'}
+              ]}
+            />
+          </View>
+          
+          <View style={{ marginBottom: 20 }}>
+            <Text>メール</Text>
+            <TextInput
+              style={{
+                width: 250,
+                borderWidth: 1,
+                padding: 5,
+                borderColor: 'gray',
+              }}
+              onChangeText={setEmail}
+              value={email}
+              placeholder="メールアドレスを入力してください"
+              autoCapitalize="none"
+              autoCorrect={false}
+            />
+          </View>
+
+          <View style={{ marginBottom: 20 }}>
+            <Text>パスワード</Text>
+            <TextInput
+              style={{
+                width: 250,
+                borderWidth: 1,
+                padding: 5,
+                borderColor: 'gray',
+              }}
+              onChangeText={setPassword}
+              value={password}
+              placeholder="パスワードを入力してください"
+              secureTextEntry={true}
+              autoCapitalize="none"
+            />
+          </View>
+
+          <View style={{ marginBottom: 20 }}>
+            <Text>パスワードの確認</Text>
+            <TextInput
+              style={{
+                width: 250,
+                borderWidth: 1,
+                padding: 5,
+                borderColor: 'gray',
+              }}
+              onChangeText={setCheckPassword}
+              value={checkPassword}
+              placeholder="再度パスワードを入力してください"
+              secureTextEntry={true}
+              autoCapitalize="none"
+            />
+          </View>
+          <View style={{ marginBottom: 20 }}>
+            <Text style={{color: 'red'}}>※全ての項目を設定しないと登録出来ません。</Text>
+          </View>
+
+          <TouchableOpacity
+            style={{
+              padding: 10,
+              backgroundColor: '#88cb7f',
+              borderRadius: 10,
+            }}
+            onPress={handleRegister}
+            disabled={!email || !password || !name || !checkPassword || !sex}
+          >
+            <Text style={{ color: 'white' }}>登録する</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={{ marginTop: 10 }}
+            onPress={() => navigation.navigate('Login')}
+          >
+          <Text>ログインはこちら</Text>
+          </TouchableOpacity>
+        </KeyboardAvoidingView>
+      </ScrollView>
     </NativeBaseProvider>
   );
 };

@@ -16,6 +16,7 @@ import { FromPartnerScreen } from '../screens/FromPartnerScreen'
 import { LoginScreen } from '../screens/LoginScreen'
 import { RegisterScreen } from '../screens/RegisterScreen'
 import { LoadingScreen } from '../screens/LoadingScreen'
+import { ConfirmProfileScreen } from '../screens/ConfirmProfileScreen'
 import { auth } from '../../firebase'
 import { ProfileSettings } from '../components/ProfileSettings'
 
@@ -31,6 +32,14 @@ const HomeStackNavigator = () => (
         headerShown: false,
       }}
     />
+    <Stack.Screen
+      name="Confirm"
+      component={ConfirmProfileScreen}
+      options={{
+        headerBackTitleVisible: false,
+        headerShown: false,
+      }}
+    />
   </Stack.Navigator>
 )
 
@@ -39,6 +48,14 @@ const FromPartnerStackNavigator = () => (
     <Stack.Screen
       name="Home"
       component={FromPartnerScreen}
+      options={{
+        headerBackTitleVisible: false,
+        headerShown: false,
+      }}
+    />
+    <Stack.Screen
+      name="Confirm"
+      component={ConfirmProfileScreen}
       options={{
         headerBackTitleVisible: false,
         headerShown: false,
@@ -74,7 +91,6 @@ const ChatStackNavigator = () => (
       name="Chatroom"
       component={ChatRoomScreen}
       options={{
-        headerTitle: '',
         headerBackTitleVisible: false,
         headerShown: false,
       }}
@@ -183,15 +199,15 @@ const ChatTabs = () => {
     <ChildTab.Navigator
       initialRouteName="chatRooms"
       screenOptions={({ route }) => ({
-        "tabBarStyle": [
+        'tabBarStyle': [
           {
-            "display": "flex"
+            'display': 'flex',
           },
           null
         ]
       })}
     >
-      <ChildTab.Screen name="matchUser" options={{ tabBarLabel: 'マッチした人' }} component={MatchUserStackNavigator} />
+      <ChildTab.Screen name="matchUser" options={{ tabBarLabel: 'マッチング' }} component={MatchUserStackNavigator} />
       <ChildTab.Screen name="chatRooms" options={{ tabBarLabel: 'メッセージ' }} component={ChatStackNavigator} />
     </ChildTab.Navigator>
   );
@@ -206,6 +222,7 @@ const ChatNavigator = () => (
         headerTitle: 'やりとり',
         headerBackTitleVisible: false,
         headerTitleAlign: 'center',
+        
         headerStyle: {
           height: 70,
         },
@@ -254,14 +271,16 @@ const TabNavigator = () => {
             name="Login" 
             component={LoginScreen}
             options={{
-              headerShown: false,
+              headerTitle: 'ログイン',
+              headerTitleAlign: 'center',
             }}
           />
           <Stack.Screen 
             name="Register"
             component={RegisterScreen}
             options={{
-              headerShown: false,
+              headerTitle: 'ユーザー登録',
+              headerTitleAlign: 'center',
             }}
           />
         </Stack.Navigator>
@@ -281,7 +300,7 @@ const TabNavigator = () => {
   return (
     <ParentTab.Navigator
       initialRouteName="bestUsersTab"
-      screenOptions={({ route }) => ({
+      screenOptions={({ navigation, route }) => ({
         tabBarIcon: ({ focused, color, size }) => {
           switch(route.name){
             case 'bestUsersTab':

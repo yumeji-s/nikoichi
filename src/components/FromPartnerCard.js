@@ -7,6 +7,7 @@ import {
   LayoutAnimation,
   UIManager,
   Platform,
+  ActivityIndicator,
 } from 'react-native';
 import { Text, Card, Button } from 'react-native-elements';
 import { useNavigation } from '@react-navigation/native';
@@ -83,15 +84,23 @@ const Deck = ({ data }) => {
     });
   
   
-    const onSwipeRight = (partner) => {
-      const requestRef = doc(firestore, `request/${partner.uid}/${partner.uid}/${auth.currentUser.uid}`);
-      setDoc(requestRef, {
-        request : true,
-      },{ capital: true }, { merge: true });
-      const requestPartnerRef = doc(firestore, `request/${auth.currentUser.uid}/${auth.currentUser.uid}/${partner.uid}`);
-      setDoc(requestPartnerRef, {
+    const onSwipeRight = async (partner) => {
+
+      // マッチング済みに追加
+      const matchingRef = collection(firestore, `matching/${auth.currentUser.uid}/${auth.currentUser.uid}`);
+      await setDoc(doc(matchingRef, partner.uid), {
+        chatName : auth.currentUser.uid + partner.uid,
+      },{ capital: true },{ merge: true });
+      const partnerRef = collection(firestore, `matching/${partner.uid}/${partner.uid}`);
+      await setDoc(doc(partnerRef, auth.currentUser.uid), {
+        chatName : auth.currentUser.uid + partner.uid,
+      },{ capital: true },{ merge: true });
+  
+      // リクエストをfalseに
+      const requestRef = doc(firestore, `request/${auth.currentUser.uid}/${auth.currentUser.uid}/${partner.uid}`);
+      await updateDoc(requestRef, {
         request : false,
-      },{ capital: true }, { merge: true });
+      },{ capital: true });
     };
   
     const onSwipeLeft = (partner) => {
@@ -144,7 +153,7 @@ const Deck = ({ data }) => {
   const RenderCards = ({ item }) => {
     const navigation = useNavigation();
     return (
-      <Card key={item.uid}>
+      <Card style={styles.cardStyle} key={item.uid}>
         <Card.Title style={styles.titleStyle}>{item.name}</Card.Title>
         <Card.Divider />
           {
@@ -153,7 +162,7 @@ const Deck = ({ data }) => {
               <Card.Image source={require('../../assets/defaultUserIcon.png')} style={styles.imageStyle} resizeMode='cover'/>
           }
         <Card.Divider />
-        <Text numberOfLines={1} style={styles.textStyle}>{item.introduction}</Text>
+        <Text numberOfLines={1} style={styles.textStyle}>{item.introduction ? item.introduction : '自己紹介が設定されていません'}</Text>
         <Button buttonStyle={styles.buttonStyle} title="プロフィールを見る" onPress={() => {navigation.navigate('Confirm', { item: item })}} />
       </Card>
     );
@@ -164,9 +173,8 @@ const Deck = ({ data }) => {
       <Card style={styles.cardStyle}>
         <Card.Title style={styles.titleStyle}>おわり</Card.Title>
         <Card.Divider />
-        <Text style={styles.textStyle}>あなたにおすすめのユーザが</Text>
-        <Text style={styles.textStyle}>いないようです</Text>
-        <Button buttonStyle={styles.buttonStyle} title="もっと探す" onPress={() => {}}/>
+        <Text style={styles.textStyle}>あなたに興味があるユーザがいないようです！</Text>
+        <Text style={styles.textStyle}>あなたからも積極的にいいねをすればマッチング率アップ！</Text>
       </Card>
     );
   };
@@ -189,8 +197,8 @@ const Deck = ({ data }) => {
     textStyle: {
       marginBottom: 10,
       fontSize: 16,
-      height: 20,
-      textAlign: 'center'
+      lineHeight: 20,
+      textAlign: 'center',
     },
     buttonStyle: {
       borderRadius: 50,

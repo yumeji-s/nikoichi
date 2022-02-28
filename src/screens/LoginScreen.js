@@ -35,7 +35,6 @@ const LoginScreen = () => {
         flex: 1,
       }}
     >
-      <Text style={{ fontSize: 20, marginBottom: 20 }}>ログイン画面</Text>
       <View style={{ marginBottom: 20 }}>
         <Text>メール</Text>
         <TextInput
@@ -84,7 +83,7 @@ const LoginScreen = () => {
         style={{ marginTop: 10 }}
        onPress={() => navigation.navigate('Register')}
       >
-      <Text>ユーザ登録はこちら</Text>
+      <Text>ユーザー登録はこちら</Text>
       </TouchableOpacity>
     </KeyboardAvoidingView>
   );

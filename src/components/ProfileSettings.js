@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
-import { Button, Box, HStack, VStack, Modal, Text, ScrollView, NativeBaseProvider } from 'native-base';
+import { Box, HStack, VStack, Modal, Text, ScrollView, NativeBaseProvider } from 'native-base';
+import { signOut } from 'firebase/auth';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+
+import { auth } from '../../firebase';
 
 export const ProfileSettings = () => {
 
