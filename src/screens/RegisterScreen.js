@@ -87,7 +87,7 @@ const RegisterScreen = () => {
             flex: 1,
           }}
         >
-          <View style={{ marginBottom: 20 }}>
+          <View style={{ marginBottom: 20, paddingTop: 20 }}>
             <Text>ニックネーム</Text>
             <TextInput
               style={{

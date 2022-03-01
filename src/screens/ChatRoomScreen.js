@@ -13,9 +13,6 @@ import { auth, firestore } from '../../firebase';
 
 
 
-// やること
-// 別のファイルに分ける
-
 
 const ChatRoomScreen = ({ route, navigation, user }) => {
     
@@ -52,10 +49,12 @@ const ChatRoomScreen = ({ route, navigation, user }) => {
 
   // メッセージは残っているか
   const hasMore = sentinel ? !Boolean(messages.find(m => m.id === sentinel.id)) : false;  
+  console.log('hasMore = '+hasMore + 'sentinel = ' + sentinel);
 
   // 送信時の処理
   const onSend = async (messages = []) => {
     // メッセージをfirestoreに登録
+    console.log(messages);
     const messageSnap = await addDoc(messageRef, ...messages);
   };
 
@@ -82,8 +81,8 @@ const ChatRoomScreen = ({ route, navigation, user }) => {
                 alignTop={true}
                 alwaysShowSend={true}
                 infiniteScroll={true}
-                // isLoadingEarlier={hasMore}
-                // loadEarlier={isLoadingEarlier}
+                isLoadingEarlier={true}
+                loadEarlier={hasMore}
                 listViewProps={{
                     onEndReached: readMore(),
                     onEndReachedThreshold: 0.4,
@@ -107,27 +106,31 @@ const ChatRoomScreen = ({ route, navigation, user }) => {
   );
 }
 
-const now = Date.now();
+const now = new Date();
+console.log(now);
 const useInfiniteSnapshotListener = (chatRoom) => {
 
   const unsubscribes = useRef([]);
   const [messages, setMessages] = useState([]);
   const messageRef = collection(firestore, `chat/${chatRoom}/messages`);  // メッセージ登録用
+  
 
   // 未来（最新メッセージ）の購読リスナー
-  const registLatestMessageListener = useCallback(() => {
-      return onSnapshot(query(messageRef, orderBy("createdAt","asc"), startAfter(now)), (snapshot) => {dispMsgSnap(snapshot)});
-  },[]);
+  // const registLatestMessageListener = useCallback(() => {
+  //   return onSnapshot(query(messageRef, orderBy("createdAt","asc"), startAfter(now)), (snapshot) => {dispMsgSnap(snapshot)});
+  // },[]);
 
   //過去メッセージの購読リスナー
   const registPastMessageListener = useCallback((time) => {
-      return onSnapshot(query(messageRef, orderBy("createdAt","desc"), startAfter(time), limit(5)), (snapshot) => {dispMsgSnap(snapshot)});
+    console.log(time);
+    return onSnapshot(query(messageRef, orderBy("createdAt","desc"), startAfter(time), limit(10)), (snapshot) => {dispMsgSnap(snapshot)});
   },[]);
 
   // 初回ロード
   const initRead = useCallback(() => {
+    console.log("init");
     // 未来のメッセージを購読する
-    unsubscribes.current.push(registLatestMessageListener());
+    // unsubscribes.current.push(registLatestMessageListener());
     // 現時刻よりも古いデータを一定数、購読する
     unsubscribes.current.push(registPastMessageListener(now));
   },[registPastMessageListener]);
@@ -136,7 +139,8 @@ const useInfiniteSnapshotListener = (chatRoom) => {
   const lastMessageDate = messages.length > 0 ? messages[messages.length - 1].createdAt : now;
   
   const readMore = useCallback(() => {
-    unsubscribes.current.push(registPastMessageListener(lastMessageDate));
+    console.log("readMore"+lastMessageDate);
+    // unsubscribes.current.push(registPastMessageListener(lastMessageDate));
   },[registPastMessageListener,lastMessageDate]);
 
   // 登録解除(Unmount時に解除）
@@ -151,7 +155,9 @@ const useInfiniteSnapshotListener = (chatRoom) => {
 
   const dispMsgSnap = (snapshot) => {
     // 取得したメッセージを表示できるように加工
+    console.log("disp");
     snapshot.docChanges().forEach((change) => {
+      // console.log(change.doc.data());
       const id = change.doc.id;
       const chat = change.doc.data();
       const newMessage = {

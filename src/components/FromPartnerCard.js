@@ -7,11 +7,10 @@ import {
   LayoutAnimation,
   UIManager,
   Platform,
-  ActivityIndicator,
 } from 'react-native';
 import { Text, Card, Button } from 'react-native-elements';
 import { useNavigation } from '@react-navigation/native';
-import { doc, setDoc } from 'firebase/firestore';
+import { doc, setDoc, collection, updateDoc } from 'firebase/firestore';
 
 import { auth, firestore } from '../../firebase';
 
@@ -103,9 +102,14 @@ const Deck = ({ data }) => {
       },{ capital: true });
     };
   
-    const onSwipeLeft = (partner) => {
-      console.log("dislike " + partner.uid);
-      // 嫌いの時
+    const onSwipeLeft = async (partner) => {
+      
+      // 嫌いの時、表示されないようにする
+      const requestRef = doc(firestore, `request/${auth.currentUser.uid}/${auth.currentUser.uid}/${partner.uid}`);
+      await updateDoc(requestRef, {
+        request : false,
+      },{ capital: true });
+      
     };
   
     return (

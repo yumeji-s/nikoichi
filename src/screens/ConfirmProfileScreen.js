@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { StyleSheet, Dimensions } from 'react-native';
 import { View, Text, NativeBaseProvider, ScrollView, Pressable, Menu, Modal, HStack } from 'native-base'; 
 import Ionicons from 'react-native-vector-icons/Ionicons';
@@ -8,12 +8,16 @@ import { Introduction, ProfileImages, ProfileList } from '../components/UserProf
 const ConfirmProfileScreen = ({ route, navigation }) => {
 
   const { item } = route.params;
-  const [showModal, setShowModal] = useState(true);
+  const [showModal, setShowModal] = useState(null);
 
   const close = () => {
     setShowModal(false);
     navigation.goBack();
   }
+
+  useEffect(() => {
+    setShowModal(true);
+  },[]);
 
   return (
     <NativeBaseProvider>
