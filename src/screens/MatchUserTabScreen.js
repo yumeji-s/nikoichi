@@ -1,27 +1,22 @@
 import React, { useState, useEffect, useReducer } from 'react';
 import { StyleSheet } from 'react-native';
 import {
-  Text,
-  SafeAreaView,
   View,
+  SafeAreaView,
   TouchableOpacity,
   ScrollView,
   StatusBar,
 } from 'react-native';
-import { Avatar, Input, Overlay, Icon, Card } from 'react-native-elements';
-import { useNavigation } from '@react-navigation/native';
-import { MaterialIcons  } from '@expo/vector-icons';
-import { doc, setDoc, getDoc, getDocs, updateDoc, collection, query, where, limit } from 'firebase/firestore';
+import { Text, Card } from 'react-native-elements';
+import { getDocs, collection } from 'firebase/firestore';
 
-import { auth, firestore, storage } from '../../firebase';
-import { LoadingScreen } from './LoadingScreen';
+import { auth, firestore } from '../../firebase';
 
 
-const MatchUserTabScreen = () => {
-  const navigation = useNavigation();
+const MatchUserTabScreen = ({ navigation, user }) => {
+
   const [users, setUsers] = useState([]);
   const [index, setIndex] = useState(0);
-  
 
   useEffect(() => getChatList(), [])
 
@@ -58,8 +53,7 @@ const MatchUserTabScreen = () => {
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView style={styles.childContainer}>
-        <Search />
-        {users.map((user, index) => (
+        {users.length == 0 ? <NoUsers /> : users.map((user, index) => (
           <ListItem key={index} user={user} navigation={navigation} />
         ))}
       </ScrollView>
@@ -67,20 +61,15 @@ const MatchUserTabScreen = () => {
   )
 }
 
-const Search = () => (
-  <View
-    style={[styles.flexify, { marginHorizontal: 5, marginTop: 10 }]}
-  >
-    <Input
-      placeholder="Search Match Users"
-      leftIcon={<Icon name="search" size={24} color="gray" />}
-      inputContainerStyle={{ borderBottomWidth: 0 }}
-      // onChangeText={}
-    />
-
-    <Icon name="rowing" size={24} color="gray" />
+const NoUsers = () => (
+  <View style={styles.noUserStyle}>
+    <Card>
+      <Card.Title style={styles.titleStyle}>マッチしたユーザーがいません...</Card.Title>
+      <Card.Divider />
+      <Text style={styles.textStyle}>あなたからも積極的にいいねをすればマッチング率アップ！</Text>
+    </Card>
   </View>
-)
+);
 
 const ListItem = ({ navigation, user }) => (
   <TouchableOpacity
@@ -107,21 +96,13 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#f5f5f5'
   },
-  headerWrapper: {
-    shadowColor: '#171717',
-    shadowOffset:{
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.2,
-    shadowRadius: 3,
-    paddingVertical: 15,
-    backgroundColor: 'white',
+  noUserStyle: {
+    alignSelf: 'center',
   },
   childContainer: {
     paddingTop: StatusBar.currentHeight,
     paddingHorizontal: 20,
-    width: '90%',
+    width: '100%',
     marginVertical: 0,
     marginHorizontal: 'auto',
   },

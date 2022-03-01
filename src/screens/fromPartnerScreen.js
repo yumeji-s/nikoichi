@@ -9,7 +9,7 @@ import { auth, firestore } from '../../firebase';
 import { LoadingScreen } from './LoadingScreen';
 import { Deck } from '../components/FromPartnerCard';
 
-const FromPartnerScreen = () => {
+const FromPartnerScreen = ({ navigation, user }) => {
 
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);

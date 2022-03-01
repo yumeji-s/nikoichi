@@ -1,0 +1,39 @@
+Date : 2022-03-01 15:08:46
+Directory : c:\Users\yumej\github\nikoichi\src\components
+Total : 12 files,  -1478 codes, -103 comments, -211 blanks, all -1792 lines
+
+Languages
++------------+------------+------------+------------+------------+------------+
+| language   | files      | code       | comment    | blank      | total      |
++------------+------------+------------+------------+------------+------------+
+| JavaScript |         12 |     -1,478 |       -103 |       -211 |     -1,792 |
++------------+------------+------------+------------+------------+------------+
+
+Directories
++--------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| path                                                               | files      | code       | comment    | blank      | total      |
++--------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| .                                                                  |         12 |     -1,478 |       -103 |       -211 |     -1,792 |
+| ..                                                                 |         12 |     -1,478 |       -103 |       -211 |     -1,792 |
+| ..\navigators                                                      |          1 |       -326 |         -7 |        -30 |       -363 |
+| ..\screens                                                         |         11 |     -1,152 |        -96 |       -181 |     -1,429 |
++--------------------------------------------------------------------+------------+------------+------------+------------+------------+
+
+Files
++--------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| filename                                                           | language   | code       | comment    | blank      | total      |
++--------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| c:\Users\yumej\github\nikoichi\src\navigators\TabNavigator.js      | JavaScript |       -326 |         -7 |        -30 |       -363 |
+| c:\Users\yumej\github\nikoichi\src\screens\ChatRoomScreen.js       | JavaScript |       -215 |        -22 |        -40 |       -277 |
+| c:\Users\yumej\github\nikoichi\src\screens\ChatTabScreen.js        | JavaScript |       -147 |        -50 |        -33 |       -230 |
+| c:\Users\yumej\github\nikoichi\src\screens\ConfirmProfileScreen.js | JavaScript |        -71 |         -7 |        -11 |        -89 |
+| c:\Users\yumej\github\nikoichi\src\screens\FromPartnerScreen.js    | JavaScript |        -55 |         -3 |        -12 |        -70 |
+| c:\Users\yumej\github\nikoichi\src\screens\LoadingScreen.js        | JavaScript |        -20 |          0 |         -6 |        -26 |
+| c:\Users\yumej\github\nikoichi\src\screens\LoginScreen.js          | JavaScript |        -84 |         -1 |         -7 |        -92 |
+| c:\Users\yumej\github\nikoichi\src\screens\MatchUserTabScreen.js   | JavaScript |       -107 |         -1 |        -14 |       -122 |
+| c:\Users\yumej\github\nikoichi\src\screens\ProfileScreen.js        | JavaScript |       -113 |         -3 |        -14 |       -130 |
+| c:\Users\yumej\github\nikoichi\src\screens\RegisterScreen.js       | JavaScript |       -244 |         -5 |        -23 |       -272 |
+| c:\Users\yumej\github\nikoichi\src\screens\SearchTabScreen.js      | JavaScript |        -38 |          0 |         -8 |        -46 |
+| c:\Users\yumej\github\nikoichi\src\screens\SwipeScreen.js          | JavaScript |        -58 |         -4 |        -13 |        -75 |
+| Total                                                              |            |     -1,478 |       -103 |       -211 |     -1,792 |
++--------------------------------------------------------------------+------------+------------+------------+------------+------------+

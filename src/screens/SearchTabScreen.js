@@ -6,8 +6,8 @@ import { MaterialIcons  } from '@expo/vector-icons';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 
-const SearchTabScreen = () => {
-
+const SearchTabScreen = ({ user }) => {
+  
   return (
     <NativeBaseProvider>
       <View style={styles.root}>

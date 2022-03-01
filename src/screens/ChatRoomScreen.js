@@ -17,10 +17,10 @@ import { auth, firestore } from '../../firebase';
 // 別のファイルに分ける
 
 
-const ChatRoomScreen = ({ route, navigation }) => {
+const ChatRoomScreen = ({ route, navigation, user }) => {
     
   // const [messages, setMessages] = useState([]);                           // 全メッセージ
-  const [currentUser, setCurrentUser] = useState([]);                     // ログインしているユーザ
+  const [currentUser, setCurrentUser] = useState(user);                     // ログインしているユーザ
   const [sentinel, setSentinel] = useState();                             // 最後のメッセージのid
   const { chatRoom, name } = route.params;                                      // チャットルーム名、チャット相手の名前
   const messageRef = collection(firestore, `chat/${chatRoom}/messages`);  // メッセージ登録用
@@ -34,14 +34,6 @@ const ChatRoomScreen = ({ route, navigation }) => {
   }
   
   useEffect(async () => {
-    // 最初のレンダリング時に自分の情報を取得
-    const userRef = doc(firestore, `users/${auth.currentUser.uid}`);
-    const snapShot = await getDoc(userRef);
-    if(snapShot.exists()){
-      setCurrentUser({
-        ...snapShot.data()
-      });
-    }
 
     // 最後のメッセージを取得
     const q = query(messageRef, orderBy('createdAt','asc'), limit(1));
@@ -90,8 +82,8 @@ const ChatRoomScreen = ({ route, navigation }) => {
                 alignTop={true}
                 alwaysShowSend={true}
                 infiniteScroll={true}
-                isLoadingEarlier={hasMore}
-                loadEarlier={isLoadingEarlier}
+                // isLoadingEarlier={hasMore}
+                // loadEarlier={isLoadingEarlier}
                 listViewProps={{
                     onEndReached: readMore(),
                     onEndReachedThreshold: 0.4,

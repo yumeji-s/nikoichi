@@ -1,26 +1,22 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { StyleSheet } from 'react-native';
 import {
-  Text,
   SafeAreaView,
   View,
   TouchableOpacity,
   ScrollView,
   StatusBar,
 } from 'react-native';
-import { Avatar, Input, Overlay, Icon } from 'react-native-elements';
-import { useNavigation } from '@react-navigation/native';
-import { MaterialIcons  } from '@expo/vector-icons';
-import { doc, setDoc, getDoc, getDocs, updateDoc, collection, query, where, limit, onSnapshot, orderBy } from 'firebase/firestore';
+import { Avatar, Card, Text } from 'react-native-elements';
+import { getDocs, collection, query, limit, onSnapshot, orderBy } from 'firebase/firestore';
 
 import { auth, firestore, storage } from '../../firebase';
 import { messageListener } from '../components/ChatListener';
 import { LoadingScreen } from '../screens/LoadingScreen'
 
 
-const ChatTabScreen = () => {
+const ChatTabScreen = ({ route, navigation }) => {
 
-  const navigation = useNavigation();
   const [users, setUsers] = useState([]);
   const unsubscribes = useRef([]);
   const [loading, setLoading] = useState(true);
@@ -70,7 +66,7 @@ const ChatTabScreen = () => {
     const result = await Promise.all(userList.map(async (user, index) => {
       const messageRef = collection(firestore, `chat/${user.chatRoom}/messages`);
       const q = query(messageRef, orderBy("createdAt","desc"), limit(1));
-      unsubscribes.current.push(await onSnapshot(q, (snapshot) => {
+      await onSnapshot(q, (snapshot) => {
         const targets = snapshot.docs.map((doc) => {
           return {...doc.data()};
         });
@@ -88,8 +84,32 @@ const ChatTabScreen = () => {
         }else{
           user.messages = targets;
         }
-      }));
+      });
     }));
+
+    // const result = await Promise.all(userList.map(async (user, index) => {
+    //   const messageRef = collection(firestore, `chat/${user.chatRoom}/messages`);
+    //   const q = query(messageRef, orderBy("createdAt","desc"), limit(1));
+    //   unsubscribes.current.push(await onSnapshot(q, (snapshot) => {
+    //     const targets = snapshot.docs.map((doc) => {
+    //       return {...doc.data()};
+    //     });
+    //     if(targets.length == 0){
+    //       user.messages = [{
+    //         _id: "",
+    //         createdAt: "",
+    //         text: "",
+    //         user: {
+    //           _id: "",
+    //           avatar: "",
+    //           name: "",
+    //         }
+    //       }];
+    //     }else{
+    //       user.messages = targets;
+    //     }
+    //   }));
+    // }));
 
     if(!unmounted){
       setUsers(userList);
@@ -105,7 +125,7 @@ const ChatTabScreen = () => {
     }
   },[]);
 
-  useEffect(() => { return () => { clear(); }; }, [clear]);
+  useEffect(() => { return () => clear() }, [clear]);
 
   if(loading){
     return <LoadingScreen/>
@@ -113,16 +133,24 @@ const ChatTabScreen = () => {
   
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView style={styles.childContainer}>
-        {/* <Search /> */}
-        
-        {users.map((user, index) => (
+      <ScrollView style={styles.childContainer}>        
+        {users.length == 0 ? <NoUsers /> : users.map((user, index) => (
           <ListItem key={index} user={user} lastMessage={user.messages} navigation={navigation} />
         ))}
       </ScrollView>
     </SafeAreaView>
   )
 }
+
+const NoUsers = () => (
+  <View style={styles.noUserStyle}>
+    <Card>
+      <Card.Title style={styles.titleStyle}>マッチしたユーザーがいません...</Card.Title>
+      <Card.Divider />
+      <Text style={styles.textStyle}>あなたからも積極的にいいねをすればマッチング率アップ！</Text>
+    </Card>
+  </View>
+);
 
 
 // const now = Date.now();
@@ -148,21 +176,6 @@ const ChatTabScreen = () => {
 
 //   return { messages, initRead };
 // };
-
-// const Search = () => (
-//   <View
-//     style={[styles.flexify, { marginHorizontal: 5, marginTop: 10 }]}
-//   >
-//     <Input
-//       placeholder="Search messages"
-//       leftIcon={<Icon name="search" size={24} color="gray" />}
-//       inputContainerStyle={{ borderBottomWidth: 0 }}
-//       // onChangeText={}
-//     />
-
-//     <Icon name="rowing" size={24} color="gray" />
-//   </View>
-// )
 
 const ListItem = ({ navigation, user, lastMessage }) => (
   <TouchableOpacity
@@ -191,21 +204,13 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#f5f5f5'
   },
-  headerWrapper: {
-    shadowColor: '#171717',
-    shadowOffset:{
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.2,
-    shadowRadius: 3,
-    paddingVertical: 15,
-    backgroundColor: 'white',
+  noUserStyle: {
+    alignSelf: 'center',
   },
   childContainer: {
     paddingTop: StatusBar.currentHeight,
     paddingHorizontal: 20,
-    width: '90%',
+    width: '100%',
     marginVertical: 0,
     marginHorizontal: 'auto',
   },

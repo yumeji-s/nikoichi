@@ -1,12 +1,11 @@
 import React, { useState } from 'react';
 import {
-  View,
   TextInput,
   TouchableOpacity,
   KeyboardAvoidingView,
   ScrollView,
 } from 'react-native';
-import { NativeBaseProvider, Text, Icon,  } from 'native-base'; 
+import { NativeBaseProvider, Text, Icon, View } from 'native-base'; 
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { doc, setDoc } from 'firebase/firestore';
@@ -69,8 +68,8 @@ const RegisterScreen = () => {
         imgURL : "",
         uid : auth.currentUser.uid,
         introduction : "",
+        sex: sex == '男性' ? 'man':'woman',
       });
-      console.log("アカウント作成");
     } catch (error) {
       console.log(error.message);
     }
@@ -78,7 +77,8 @@ const RegisterScreen = () => {
   
   return (
     <NativeBaseProvider>
-      <ScrollView>
+      <View flex={1}>
+      <ScrollView flex={1} justifyContent='center'>
         <KeyboardAvoidingView
           behavior={Platform.OS === "ios" ? "padding" : null}
           style={{
@@ -87,7 +87,7 @@ const RegisterScreen = () => {
             flex: 1,
           }}
         >
-          <View style={{ marginBottom: 20, paddingTop: 20 }}>
+          <View style={{ marginBottom: 20 }}>
             <Text>ニックネーム</Text>
             <TextInput
               style={{
@@ -248,6 +248,7 @@ const RegisterScreen = () => {
           </TouchableOpacity>
         </KeyboardAvoidingView>
       </ScrollView>
+      </View>
     </NativeBaseProvider>
   );
 };

@@ -1,41 +1,21 @@
-import React, { useState, useCallback, useEffect } from 'react';
-import { View, StyleSheet, Image } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, StyleSheet } from 'react-native';
 import { Avatar } from 'react-native-elements';
-import { Button, NativeBaseProvider, ScrollView, Text } from 'native-base'; 
-import { useNavigation } from '@react-navigation/native';
+import { NativeBaseProvider, ScrollView, Text } from 'native-base';
 import Constants from 'expo-constants';
 import * as ImagePicker from 'expo-image-picker';
 import * as Permissions from 'expo-permissions';
-import { doc, setDoc, getDoc, updateDoc } from 'firebase/firestore';
+import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 
 import { auth, firestore, storage } from '../../firebase';
-import { LoadingScreen } from './LoadingScreen';
 import { ProfileList, Introduction } from '../components/ProfileList';
 
-const ProfileScreen = () => {
+const ProfileScreen = ({ navigation, user }) => {
   
-  const [user, setUser] = useState();
-  const [icon, setIcon] = useState(null);
+  const [icon, setIcon] = useState(user.imgURL);
   const [iconUpdateAt, setIconUpdateAt] = useState(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(async () => {
-    // 最初のレンダリング時にアイコンなどを取得
-    const userRef = doc(firestore, `users/${auth.currentUser.uid}`);
-    const snapShot = await getDoc(userRef);
-    if(snapShot.data().imgURL != ''){
-      setIcon(snapShot.data().imgURL);
-      setIconUpdateAt(snapShot.data().updateAt);
-    }
-    setUser({
-      ...snapShot.data(),
-    });
-    setLoading(false);
-  },[]);
-
-  
-
+ 
   const pickImage = async () => {
 
     // アイコンが更新されたら五分間更新できないようにする
@@ -84,10 +64,6 @@ const ProfileScreen = () => {
     });
   };
 
-  if(loading){
-    return <LoadingScreen />;
-  }
-
   return (
     <NativeBaseProvider>
       <View style={styles.root}>
@@ -100,13 +76,14 @@ const ProfileScreen = () => {
             <Text fontSize='2xl'>{user.name}</Text>
           </View>
           <View alignSelf="center">
-            {icon && <Avatar rounded size="xlarge" source={{uri: icon}} activeOpacity={0.7} key={icon} onPress={pickImage}>
-              <Avatar.Accessory size={50} onPress={pickImage} />
-            </Avatar>}
-            {!icon && <Avatar rounded size="xlarge" icon={{name: 'user', color: 'white', type: 'font-awesome'}}
+            {icon != '' ? 
+              (<Avatar rounded size="xlarge" source={{uri: icon}} activeOpacity={0.7} key={icon} onPress={pickImage}>
+                <Avatar.Accessory size={50} onPress={pickImage} />
+              </Avatar>)
+            : (<Avatar rounded size="xlarge" icon={{name: 'user', color: 'white', type: 'font-awesome'}}
                 containerStyle={{backgroundColor: "gray"}} activeOpacity={0.7} key={icon} onPress={pickImage}>
               <Avatar.Accessory size={50} onPress={pickImage} />
-            </Avatar>}
+            </Avatar>)}
           </View>
           <View>
             <Introduction introduction={user.introduction} />

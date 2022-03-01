@@ -5,6 +5,7 @@ import { createMaterialTopTabNavigator } from '@react-navigation/material-top-ta
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
 import { createStackNavigator } from '@react-navigation/stack'
 import { onAuthStateChanged } from 'firebase/auth'
+import { doc, getDoc } from 'firebase/firestore';
 
 import { ChatRoomScreen } from '../screens/ChatRoomScreen'
 import { ChatTabScreen } from '../screens/ChatTabScreen'
@@ -17,92 +18,98 @@ import { LoginScreen } from '../screens/LoginScreen'
 import { RegisterScreen } from '../screens/RegisterScreen'
 import { LoadingScreen } from '../screens/LoadingScreen'
 import { ConfirmProfileScreen } from '../screens/ConfirmProfileScreen'
-import { auth } from '../../firebase'
+import { auth, firestore } from '../../firebase'
 import { ProfileSettings } from '../components/ProfileSettings'
 
 const Stack = createStackNavigator()
 
-const HomeStackNavigator = () => (
+const HomeStackNavigator = ({ user }) => (
   <Stack.Navigator initialRouteName="Home">
     <Stack.Screen
       name="Home"
-      component={SwipeScreen}
       options={{
         headerBackTitleVisible: false,
         headerShown: false,
       }}
-    />
+    >
+      {(props) => <SwipeScreen {...props} user={user} />}
+    </Stack.Screen>
     <Stack.Screen
       name="Confirm"
-      component={ConfirmProfileScreen}
       options={{
         headerBackTitleVisible: false,
         headerShown: false,
       }}
-    />
+    >
+      {(props) => <ConfirmProfileScreen {...props} user={user} />}
+    </Stack.Screen>
   </Stack.Navigator>
 )
 
-const FromPartnerStackNavigator = () => (
+const FromPartnerStackNavigator = ({ user }) => (
   <Stack.Navigator initialRouteName="Home">
     <Stack.Screen
       name="Home"
-      component={FromPartnerScreen}
       options={{
         headerBackTitleVisible: false,
         headerShown: false,
       }}
-    />
+    >
+      {(props) => <FromPartnerScreen {...props} user={user} />}
+    </Stack.Screen>
     <Stack.Screen
       name="Confirm"
-      component={ConfirmProfileScreen}
       options={{
         headerBackTitleVisible: false,
         headerShown: false,
       }}
-    />
+    >
+      {(props) => <ConfirmProfileScreen {...props} user={user} />}
+    </Stack.Screen>
   </Stack.Navigator>
 )
 
-const MatchUserStackNavigator = () => (
+const MatchUserStackNavigator = ({ user }) => (
   <Stack.Navigator initialRouteName="Main">
     <Stack.Screen
       name="Main"
-      component={MatchUserTabScreen}
       options={{
         headerBackTitleVisible: false,
         headerShown: false,
       }}
-    />
+    >
+      {(props) => <MatchUserTabScreen {...props} user={user} />}
+    </Stack.Screen>
   </Stack.Navigator>
 )
 
-const ChatStackNavigator = () => (
+const ChatStackNavigator = ({ user }) => (
   <Stack.Navigator initialRouteName="Main">
     <Stack.Screen
       name="Main"
-      component={ChatTabScreen}
       options={{
         headerBackTitleVisible: false,
         headerShown: false,
       }}
-    />
+    >
+      {(props) => <ChatTabScreen {...props} user={user} />}
+    </Stack.Screen>
     <Stack.Screen
       name="Chatroom"
-      component={ChatRoomScreen}
       options={{
         headerBackTitleVisible: false,
         headerShown: false,
       }}
-    />
+    >
+      {(props) => <ChatRoomScreen {...props} user={user} />}
+    </Stack.Screen>
   </Stack.Navigator>
 )
 
-const SearchStackNavigator = () => (
+const SearchStackNavigator = ({ user }) => (
   <Stack.Navigator initialRouteName="Main">
     <Stack.Screen
       name="Main"
-      component={SearchTabScreen}
       options={{
         headerBackTitleVisible: false,
         headerTitleAlign: 'center',
@@ -114,15 +121,16 @@ const SearchStackNavigator = () => (
           height: 30,
         },
       }}
-    />
+    >
+    {(props) => <SearchTabScreen {...props} user={user} />}
+    </Stack.Screen>
   </Stack.Navigator>
 )
 
-const ProfileNavigator = () => (
+const ProfileNavigator = ({ user }) => (
   <Stack.Navigator initialRouteName="Main">
     <Stack.Screen
       name="Main"
-      component={ProfileScreen}
       options={{
         headerTitle: 'マイページ',
         headerBackTitleVisible: false,
@@ -138,21 +146,19 @@ const ProfileNavigator = () => (
           paddingTop: 10,
           paddingRight: 10,
         }
-        
       }}
-    />
+    >
+      {(props) => <ProfileScreen {...props} user={user} />}
+    </Stack.Screen>
   </Stack.Navigator>
 )
-
-
-
 
 
 // 親タブ
 const ParentTab = createBottomTabNavigator();
 const ChildTab = createMaterialTopTabNavigator();
 
-const UserTabs = () => {
+const UserTabs = ({ user }) => {
   return (
     <ChildTab.Navigator
       initialRouteName="bestUser"
@@ -165,17 +171,20 @@ const UserTabs = () => {
         ]
       })}
     >
-      <ChildTab.Screen name="bestUser" options={{ tabBarLabel: 'おすすめ' }} component={HomeStackNavigator} />
-      <ChildTab.Screen name="fromPartner" options={{ tabBarLabel: '相手から' }} component={FromPartnerStackNavigator} />
+      <ChildTab.Screen name="bestUser" options={{ tabBarLabel: 'おすすめ' }}>
+        {(props) => <HomeStackNavigator {...props} user={user} />}
+      </ChildTab.Screen> 
+      <ChildTab.Screen name="fromPartner" options={{ tabBarLabel: '相手から' }}>
+        {(props) => <FromPartnerStackNavigator {...props} user={user} />}
+      </ChildTab.Screen> 
     </ChildTab.Navigator>
   );
 }
 
-const UserStackNavigator = () => (
+const UserStackNavigator = ({ user }) => (
   <Stack.Navigator initialRouteName="Main">
     <Stack.Screen
       name="Main"
-      component={UserTabs}
       options={
         {
           headerBackTitleVisible: false,
@@ -190,11 +199,13 @@ const UserStackNavigator = () => (
         }
         
       }
-    />
+    >
+      {(props) => <UserTabs {...props} user={user} />}
+    </Stack.Screen>
   </Stack.Navigator>
 )
 
-const ChatTabs = () => {
+const ChatTabs = ({ user }) => {
   return (
     <ChildTab.Navigator
       initialRouteName="chatRooms"
@@ -207,17 +218,20 @@ const ChatTabs = () => {
         ]
       })}
     >
-      <ChildTab.Screen name="matchUser" options={{ tabBarLabel: 'マッチング' }} component={MatchUserStackNavigator} />
-      <ChildTab.Screen name="chatRooms" options={{ tabBarLabel: 'メッセージ' }} component={ChatStackNavigator} />
+      <ChildTab.Screen name="matchUser" options={{ tabBarLabel: 'マッチング' }}>
+        {(props) => <MatchUserStackNavigator {...props} user={user} />}
+      </ChildTab.Screen> 
+      <ChildTab.Screen name="chatRooms" options={{ tabBarLabel: 'メッセージ' }}>
+        {(props) => <ChatStackNavigator {...props} user={user} />}
+      </ChildTab.Screen>
     </ChildTab.Navigator>
   );
 }
 
-const ChatNavigator = () => (
+const ChatNavigator = ({ user }) => (
   <Stack.Navigator initialRouteName="Main">
     <Stack.Screen
       name="Main"
-      component={ChatTabs}
       options={{
         headerTitle: 'やりとり',
         headerBackTitleVisible: false,
@@ -227,7 +241,9 @@ const ChatNavigator = () => (
           height: 70,
         },
       }}
-    />
+    >
+      {(props) => <ChatTabs {...props} user={user} />}
+    </Stack.Screen>
   </Stack.Navigator>
 )
 
@@ -239,9 +255,10 @@ const userInfo = () => {
   // ログイン情報の取得
   useEffect(() => {
     // ログイン状況の監視
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
-        setUser(user)
+        const userInfo = await getCurrentUser(user)
+        setUser(userInfo)
       }else{
         setUser(null)
       }
@@ -250,7 +267,17 @@ const userInfo = () => {
     // 監視の解除
     return () => unsubscribe()
   }, []);
-  return [user == null ? false : true, loading]
+  return [user, loading]
+}
+
+const getCurrentUser = async (user) => {
+
+  // 最初のレンダリング時にアイコンなどを取得
+  const userRef = doc(firestore, `users/${user.uid}`);
+  const snapShot = await getDoc(userRef);
+  return {
+    ...snapShot.data()
+  }
 }
 
 const TabNavigator = () => {
@@ -323,10 +350,10 @@ const TabNavigator = () => {
         ]
       })}
     >
-      <ParentTab.Screen name="bestUsersTab" component={UserStackNavigator} />
-      <ParentTab.Screen name="SearchTab" component={SearchStackNavigator} />
-      <ParentTab.Screen name="ChatTab" component={ChatNavigator} />
-      <ParentTab.Screen name="ProfTab" component={ProfileNavigator} />
+      <ParentTab.Screen name="bestUsersTab">{(props) => <UserStackNavigator {...props} user={user} />}</ParentTab.Screen> 
+      <ParentTab.Screen name="SearchTab">{(props) => <SearchStackNavigator {...props} user={user} />}</ParentTab.Screen> 
+      <ParentTab.Screen name="ChatTab">{(props) => <ChatNavigator {...props} user={user} />}</ParentTab.Screen> 
+      <ParentTab.Screen name="ProfTab">{(props) => <ProfileNavigator {...props} user={user} />}</ParentTab.Screen> 
     </ParentTab.Navigator>
   )
 }
