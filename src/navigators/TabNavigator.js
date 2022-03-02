@@ -80,6 +80,15 @@ const MatchUserStackNavigator = ({ user }) => (
     >
       {(props) => <MatchUserTabScreen {...props} user={user} />}
     </Stack.Screen>
+    <Stack.Screen
+      name="Confirm"
+      options={{
+        headerBackTitleVisible: false,
+        headerShown: false,
+      }}
+    >
+      {(props) => <ConfirmProfileScreen {...props} user={user} />}
+    </Stack.Screen>
   </Stack.Navigator>
 )
 

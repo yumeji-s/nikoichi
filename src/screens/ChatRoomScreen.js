@@ -82,7 +82,7 @@ const ChatRoomScreen = ({ route, navigation, user }) => {
                 alwaysShowSend={true}
                 infiniteScroll={true}
                 isLoadingEarlier={true}
-                loadEarlier={hasMore}
+                // loadEarlier={hasMore}
                 listViewProps={{
                     onEndReached: readMore(),
                     onEndReachedThreshold: 0.4,

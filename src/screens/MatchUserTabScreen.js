@@ -74,7 +74,7 @@ const NoUsers = () => (
 const ListItem = ({ navigation, user }) => (
   <TouchableOpacity
     style={[styles.flexify, styles.bordered]}
-    onPress={() => {navigation.navigate('Chatroom', {...user})}}
+    onPress={() => {navigation.navigate('Confirm', { item: user })}}
   >
     <View style={{ width: '40%' }}>
       <Card>

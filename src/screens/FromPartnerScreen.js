@@ -38,7 +38,7 @@ const FromPartnerScreen = ({ navigation, user }) => {
       users.push(
         {
           ...doc.data(),
-          uri : doc.data().imgURL == '' ? null : doc.data().imgURL,
+          imgURL : doc.data().imgURL == '' ? null : doc.data().imgURL,
         }
       );
     });

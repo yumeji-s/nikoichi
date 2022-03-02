@@ -16,6 +16,8 @@ const ProfileScreen = ({ navigation, user }) => {
   const [icon, setIcon] = useState(user.imgURL);
   const [iconUpdateAt, setIconUpdateAt] = useState(null);
  
+
+  // 画像フォルダを開く
   const pickImage = async () => {
 
     // アイコンが更新されたら五分間更新できないようにする
@@ -43,6 +45,7 @@ const ProfileScreen = ({ navigation, user }) => {
     }
   };
 
+  // アイコンを更新する
   const updateIcon = async (url) => {
     const iconRef = ref(storage, `images/${auth.currentUser.uid}/icon`);
     const localUri = await fetch(url);

@@ -10,7 +10,7 @@ import {
 import { Avatar, Card, Text } from 'react-native-elements';
 import { getDocs, collection, query, limit, onSnapshot, orderBy } from 'firebase/firestore';
 
-import { auth, firestore, storage } from '../../firebase';
+import { auth, firestore } from '../../firebase';
 import { messageListener } from '../components/ChatListener';
 import { LoadingScreen } from '../screens/LoadingScreen'
 
@@ -40,6 +40,7 @@ const ChatTabScreen = ({ route, navigation }) => {
     const matchingUserRef = collection(firestore, `users`);
     const matchingUserSnap = await getDocs(matchingUserRef);
     let userList = [];
+    console.log('start');
     matchingUserSnap.docs.forEach((doc) => {
 
       // マッチした人がいるか検索
@@ -54,75 +55,70 @@ const ChatTabScreen = ({ route, navigation }) => {
         );
       }
     });
-
-
-
-    // メッセージ取得前にsetUsersが動いてる
-    // メッセージ取得後setUser動かす、
-    // やり取りした順に並べる
     
-    // userListに最新のメッセージ追加
-
-    const result = await Promise.all(userList.map(async (user, index) => {
-      const messageRef = collection(firestore, `chat/${user.chatRoom}/messages`);
-      const q = query(messageRef, orderBy("createdAt","desc"), limit(1));
-      await onSnapshot(q, (snapshot) => {
-        const targets = snapshot.docs.map((doc) => {
-          return {...doc.data()};
-        });
-        if(targets.length == 0){
-          user.messages = [{
-            _id: "",
-            createdAt: "",
-            text: "",
-            user: {
-              _id: "",
-              avatar: "",
-              name: "",
-            }
-          }];
-        }else{
-          user.messages = targets;
-        }
-      });
-    }));
-
-    // const result = await Promise.all(userList.map(async (user, index) => {
-    //   const messageRef = collection(firestore, `chat/${user.chatRoom}/messages`);
-    //   const q = query(messageRef, orderBy("createdAt","desc"), limit(1));
-    //   unsubscribes.current.push(await onSnapshot(q, (snapshot) => {
-    //     const targets = snapshot.docs.map((doc) => {
-    //       return {...doc.data()};
-    //     });
-    //     if(targets.length == 0){
-    //       user.messages = [{
-    //         _id: "",
-    //         createdAt: "",
-    //         text: "",
-    //         user: {
-    //           _id: "",
-    //           avatar: "",
-    //           name: "",
-    //         }
-    //       }];
-    //     }else{
-    //       user.messages = targets;
-    //     }
-    //   }));
-    // }));
+    // リスナーを作成
+    userList.map((user, index) => {
+      unsubscribes.current.push(chatlistener(user, index));
+    })
 
     if(!unmounted){
       setUsers(userList);
+      console.log(...userList);
       setLoading(false);
     }
 
     return () => { unmounted = true; };
   }, []);
 
+  const chatlistener = (user, index) => {
+    
+    const messageRef = collection(firestore, `chat/${user.chatRoom}/messages`);
+    const q = query(messageRef, orderBy("createdAt","desc"), limit(1));
+    return onSnapshot(q, (snapshot) => {
+      // 0件 or 1件 取得
+      const targets = snapshot.docs.map((doc) => {
+        return {...doc.data()};
+      });
+
+      // usersはstateだから最新の値を取得できない
+      let cpUsers = {...users};
+      console.log(cpUsers);
+      let msg;
+      // メッセージがない時は空白で初期化
+      if(targets.length == 0){
+        msg = [{
+          _id: "",
+          createdAt: "",
+          text: "",
+          user: {
+            _id: "",
+            avatar: "",
+            name: "",
+          }
+        }];
+      }else{
+        msg = [{
+          _id: targets[0]._id,
+          createdAt: targets[0].createdAt.toDate(),
+          text: targets[0].text,
+          user: {
+            _id: targets[0].user._id,
+            avatar: targets[0].user.avatar,
+            name: targets[0].user.name,
+          }
+        }];
+      }
+      // stateの一部だけ更新する方法
+      // https://qiita.com/Mitsuw0/items/b9518b510568e1778b0e
+      setUsers((prevUsers) => ([{...prevUsers}, prevUsers[index].messages: msg]));
+    });
+  }
+
   const clear = useCallback(() => {
     for(const unsubscribe of unsubscribes.current){
       unsubscribe();
     }
+    console.log('clear');
   },[]);
 
   useEffect(() => { return () => clear() }, [clear]);
@@ -152,31 +148,6 @@ const NoUsers = () => (
   </View>
 );
 
-
-// const now = Date.now();
-// const lastMessagesSnapshotListener = (users) => {
-
-//   users.map((user) => {
-//     const messageRef = collection(firestore, `chat/${user.chatRoom}/messages`);  // メッセージ登録用
-//   });
-  
-
-//   //過去メッセージの購読リスナー
-//   const registPastMessageListener = useCallback((time) => {
-//       return onSnapshot(query(messageRef, orderBy("createdAt","desc"), startAfter(time), limit(1)), (snapshot) => {dispMsgSnap(snapshot)});
-//   },[]);
-
-//   // 初回ロード
-//   const initRead = useCallback(() => {
-//     // 未来のメッセージを購読する
-//     // unsubscribes.current.push(registLatestMessageListener());
-//     // 現時刻よりも古いデータを一定数、購読する
-//     unsubscribes.current.push(registPastMessageListener(now));
-//   },[registPastMessageListener]);
-
-//   return { messages, initRead };
-// };
-
 const ListItem = ({ navigation, user, lastMessage }) => (
   <TouchableOpacity
     style={[styles.flexify, styles.bordered]}
@@ -184,18 +155,20 @@ const ListItem = ({ navigation, user, lastMessage }) => (
   >
     <View style={styles.flexify}>
       {user.imgURL != "" 
-        ? <Avatar rounded source={{uri: user.imgURL}} activeOpacity={0.7} />
-        : <Avatar rounded icon={{name: 'user', color: 'white', type: 'font-awesome'}} containerStyle={{backgroundColor: "gray"}} activeOpacity={0.7} />
+        ? <Avatar rounded source={{uri: user.imgURL}} activeOpacity={0.7} size={'medium'} marginLeft={10} />
+        : <Avatar rounded icon={{name: 'user', color: 'white', type: 'font-awesome'}} containerStyle={{backgroundColor: "gray"}} activeOpacity={0.7} size={'medium'} marginLeft={10} />
       }
-      <View style={{ marginLeft: 10 }}>
-        <Text h4 style={{ fontWeight: "600" }}>
+      <View style={{ marginLeft: 20 }}>
+        <Text numberOfLines={1} style={{ fontSize: 20, marginTop: 10}}>
           {user.name}
         </Text>
-    <Text>{lastMessage != undefined ? lastMessage.text : ""}</Text>
+        <Text numberOfLines={1} style={{lineHeight: 40, fontSize: 20, marginTop: 10}}>
+          {lastMessage != undefined ? lastMessage.text : ""}
+        </Text>
       </View>
     </View>
 
-    <Text>{lastMessage != undefined ? lastMessage.createdAt : ""}</Text>
+    <Text style={{lineHeight: 40, fontSize: 20, marginRight: 30 }}>{lastMessage != undefined ? lastMessage.createdAt : ""}</Text>
   </TouchableOpacity>
 );
 
@@ -217,7 +190,8 @@ const styles = StyleSheet.create({
   flexify: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
+    justifyContent: 'space-between', 
+    backgroundColor: 'lavender'
   },
   bordered: {
     borderTopWidth: 1,

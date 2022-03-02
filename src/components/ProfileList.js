@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Box, Button, Input, FormControl, Modal, VStack, HStack, Text, TextArea, ScrollView } from 'native-base';
 
 import { getSelect, updateProfile } from '../components/ProfileSelect';
+import { getProfileItems } from '../text/ProfileText';
 
 // itemをまとめておく
 const Section = ( {title, children} ) => {
@@ -112,103 +113,7 @@ const Introduction = ( { introduction } ) => {
 }
 
 const ProfileList = ( {user} ) => {
-  const items = [
-    {
-      key: 'age',
-      title: '年齢',
-      val: user.age,
-    },
-    {
-      key: 'address',
-      title: '居住地',
-      val: user.address,
-    },
-    {
-      key: 'workplace',
-      title: '勤務地',
-      val: user.workplace,
-    },
-    {
-      key: 'birthplace',
-      title: '出身地',
-      val: user.birthplace,
-    },
-    {
-      key: 'bloodtype',
-      title: '血液型',
-      val: user.bloodtype,
-    },
-    {
-      key: 'height',
-      title: '身長',
-      val: user.height,
-    },
-    {
-      key: 'body',
-      title: '体型',
-      val: user.body,
-    },
-    {
-      key: 'background',
-      title: '学歴',
-      val: user.background,
-    },
-    {
-      key: 'income',
-      title: '年収',
-      val: user.income,
-    },
-    {
-      key: 'job',
-      title: '仕事',
-      val: user.job,
-    },
-    {
-      key: 'holiday',
-      title: '休日',
-      val: user.holiday,
-    },
-    {
-      key: 'marriagehistory',
-      title: '結婚歴',
-      val: user.marriagehistory,
-    },
-    {
-      key: 'children',
-      title: '子供の有無',
-      val: user.children,
-    },
-    {
-      key: 'cigarette',
-      title: '煙草',
-      val: user.cigarette,
-    },
-    {
-      key: 'alcohol',
-      title: 'お酒',
-      val: user.alcohol,
-    },
-    {
-      key: 'housemate',
-      title: '一緒に住んでいる人',
-      val: user.housemate,
-    },
-    {
-      key: 'meet',
-      title: '出会うまでの希望',
-      val: user.meet,
-    },
-    {
-      key: 'datecost',
-      title: '初回デート費用',
-      val: user.datecost,
-    },
-    {
-      key: 'marriage',
-      title: '結婚に対する意思',
-      val: user.marriage,
-    },
-  ];
+  const items = getProfileItems(user);
   const children = items.map((item, index) => (
     <Item key={index} title={item.title} select={getSelect(item.key, item.val)} />
   ));

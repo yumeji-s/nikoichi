@@ -95,8 +95,7 @@ const Deck = ({ data }) => {
     };
   
     const onSwipeLeft = (partner) => {
-      console.log("dislike " + partner.uid);
-      // 嫌いの時
+      // 嫌いの時,ユーザが少ないので今は何もしない
     };
   
     return (
@@ -148,8 +147,8 @@ const Deck = ({ data }) => {
         <Card.Title style={styles.titleStyle}>{item.name}</Card.Title>
         <Card.Divider />
           {
-            item.uri ? 
-              <Card.Image source={{ uri: item.uri }} style={styles.imageStyle} resizeMode='cover'/> :
+            item.imgURL ? 
+              <Card.Image source={{ uri: item.imgURL }} style={styles.imageStyle} resizeMode='cover'/> :
               <Card.Image source={require('../../assets/defaultUserIcon.png')} style={styles.imageStyle} resizeMode='cover'/>
           }
         <Card.Divider />
