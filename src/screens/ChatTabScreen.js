@@ -63,7 +63,6 @@ const ChatTabScreen = ({ route, navigation }) => {
 
     if(!unmounted){
       setUsers(userList);
-      console.log(...userList);
       setLoading(false);
     }
 
@@ -82,11 +81,11 @@ const ChatTabScreen = ({ route, navigation }) => {
 
       // usersはstateだから最新の値を取得できない
       let cpUsers = {...users};
-      console.log(cpUsers);
+      // console.log(cpUsers);
       let msg;
       // メッセージがない時は空白で初期化
       if(targets.length == 0){
-        msg = [{
+        msg = {
           _id: "",
           createdAt: "",
           text: "",
@@ -95,9 +94,9 @@ const ChatTabScreen = ({ route, navigation }) => {
             avatar: "",
             name: "",
           }
-        }];
+        };
       }else{
-        msg = [{
+        msg = {
           _id: targets[0]._id,
           createdAt: targets[0].createdAt.toDate(),
           text: targets[0].text,
@@ -106,19 +105,26 @@ const ChatTabScreen = ({ route, navigation }) => {
             avatar: targets[0].user.avatar,
             name: targets[0].user.name,
           }
-        }];
+        };
       }
-      // stateの一部だけ更新する方法
-      // https://qiita.com/Mitsuw0/items/b9518b510568e1778b0e
-      setUsers((prevUsers) => ([{...prevUsers}, prevUsers[index].messages: msg]));
+      console.log('setUsers'); 
+
+      // state（連想配列の配列）の一部だけ更新
+      setUsers((prevUsers) =>
+        prevUsers.map((user, i) => (
+          i == index 
+            ? { ...user, messages : msg}
+            : user
+        ))
+      );
     });
   }
 
   const clear = useCallback(() => {
     for(const unsubscribe of unsubscribes.current){
       unsubscribe();
+      console.log('clear');
     }
-    console.log('clear');
   },[]);
 
   useEffect(() => { return () => clear() }, [clear]);
@@ -168,9 +174,18 @@ const ListItem = ({ navigation, user, lastMessage }) => (
       </View>
     </View>
 
-    <Text style={{lineHeight: 40, fontSize: 20, marginRight: 30 }}>{lastMessage != undefined ? lastMessage.createdAt : ""}</Text>
+    <Text style={{lineHeight: 40, fontSize: 20, marginRight: 30 }}>{lastMessage != undefined ? getCreateTime(lastMessage.createdAt) : ""}</Text>
   </TouchableOpacity>
 );
+
+const getCreateTime = (createAt) => {
+  const today = new Date();
+  // 今日なら時間、一週間以内なら曜日、今年なら月日、それ以前なら年月日
+  let format = 'hh:mm';
+  format = format.replace(/hh/g, createAt.getHours());
+  format = format.replace(/mm/g, createAt.getMinutes());
+  return format;
+}
 
 const styles = StyleSheet.create({
   container: {
