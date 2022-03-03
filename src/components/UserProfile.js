@@ -6,8 +6,8 @@ import { getProfileItems } from '../text/ProfileText';
 const ProfileImages = ({ item }) => {
   return (
     <View alignSelf="center">
-      {item.imgURL && <Avatar size="xl" source={{uri: item.imgURL}} activeOpacity={0.7} key={item.imgURL} />}
-      {!item.imgURL && <Avatar size='xl' icon={{name: 'user', color: 'white', type: 'font-awesome'}}
+      {item.imgURL != '' && <Avatar size="xl" source={{uri: item.imgURL}} activeOpacity={0.7} key={item.imgURL} />}
+      {item.imgURL == '' && <Avatar size='xl' icon={{name: 'user', color: 'white', type: 'font-awesome'}}
           containerStyle={{backgroundColor: "gray"}} activeOpacity={0.7} key={item.imgURL} />}
     </View>
   );

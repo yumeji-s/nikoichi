@@ -9,6 +9,8 @@ import {
 } from 'react-native';
 import { Avatar, Card, Text } from 'react-native-elements';
 import { getDocs, collection, query, limit, onSnapshot, orderBy } from 'firebase/firestore';
+import { parseISO } from 'date-fns';
+// import { utcToZonedTime } from 'date-fns-tz'
 
 import { auth, firestore } from '../../firebase';
 import { messageListener } from '../components/ChatListener';
@@ -40,7 +42,6 @@ const ChatTabScreen = ({ route, navigation }) => {
     const matchingUserRef = collection(firestore, `users`);
     const matchingUserSnap = await getDocs(matchingUserRef);
     let userList = [];
-    console.log('start');
     matchingUserSnap.docs.forEach((doc) => {
 
       // マッチした人がいるか検索
@@ -79,9 +80,6 @@ const ChatTabScreen = ({ route, navigation }) => {
         return {...doc.data()};
       });
 
-      // usersはstateだから最新の値を取得できない
-      let cpUsers = {...users};
-      // console.log(cpUsers);
       let msg;
       // メッセージがない時は空白で初期化
       if(targets.length == 0){
@@ -107,7 +105,6 @@ const ChatTabScreen = ({ route, navigation }) => {
           }
         };
       }
-      console.log('setUsers'); 
 
       // state（連想配列の配列）の一部だけ更新
       setUsers((prevUsers) =>
@@ -157,7 +154,7 @@ const NoUsers = () => (
 const ListItem = ({ navigation, user, lastMessage }) => (
   <TouchableOpacity
     style={[styles.flexify, styles.bordered]}
-    onPress={() => {navigation.navigate('Chatroom', {...user})}}
+    onPress={() => navigation.navigate('Chatroom', {chatRoom: user.chatRoom, name: user.name})}
   >
     <View style={styles.flexify}>
       {user.imgURL != "" 
@@ -178,12 +175,16 @@ const ListItem = ({ navigation, user, lastMessage }) => (
   </TouchableOpacity>
 );
 
-const getCreateTime = (createAt) => {
-  const today = new Date();
+const getCreateTime = (createdAt) => {
+
+  if(createdAt === ''){
+    return '';
+  }
   // 今日なら時間、一週間以内なら曜日、今年なら月日、それ以前なら年月日
+  // const today = utcToZonedTime(new Date(), 'Asia/Tokyo');
   let format = 'hh:mm';
-  format = format.replace(/hh/g, createAt.getHours());
-  format = format.replace(/mm/g, createAt.getMinutes());
+  format = format.replace(/hh/g, createdAt.getHours());
+  format = format.replace(/mm/g, createdAt.getMinutes());
   return format;
 }
 
@@ -202,17 +203,21 @@ const styles = StyleSheet.create({
     marginVertical: 0,
     marginHorizontal: 'auto',
   },
+  block: {
+  },
   flexify: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between', 
-    backgroundColor: 'lavender'
+    backgroundColor: 'lavender',
   },
   bordered: {
     borderTopWidth: 1,
     borderBottomWidth: 1,
-    borderColor: '#f5f5f5',
+    borderColor: 'steelblue',
     paddingVertical: 10,
+    borderWidth: 1,
+    borderRadius: 10,
   },
 })
 

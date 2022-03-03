@@ -16,11 +16,11 @@ import { auth, firestore } from '../../firebase';
 
 const ChatRoomScreen = ({ route, navigation, user }) => {
     
-  // const [messages, setMessages] = useState([]);                           // 全メッセージ
+  // const [messages, setMessages] = useState([]);                          // 全メッセージ
   const [currentUser, setCurrentUser] = useState(user);                     // ログインしているユーザ
-  const [sentinel, setSentinel] = useState();                             // 最後のメッセージのid
-  const { chatRoom, name } = route.params;                                      // チャットルーム名、チャット相手の名前
-  const messageRef = collection(firestore, `chat/${chatRoom}/messages`);  // メッセージ登録用
+  const [sentinel, setSentinel] = useState();                               // 最後のメッセージのid
+  const { chatRoom, name } = route.params;                                  // チャットルーム名、チャット相手の名前
+  const messageRef = collection(firestore, `chat/${chatRoom}/messages`);    // メッセージ登録用
   const { messages, readMore, initRead } = useInfiniteSnapshotListener(chatRoom);
 
   const [showModal, setShowModal] = useState(true);
@@ -32,14 +32,13 @@ const ChatRoomScreen = ({ route, navigation, user }) => {
   
   useEffect(async () => {
 
-    // 最後のメッセージを取得
+    // 最後の（一番日付の早い）メッセージを取得
     const q = query(messageRef, orderBy('createdAt','asc'), limit(1));
     const querySnapshot = await getDocs(q);
     querySnapshot.forEach((doc) => {
       setSentinel(doc);
     });
 
-    // onSnapshot(query(messageRef, orderBy("createdAt","asc")), (snapshot) => {dispMsgSnap(snapshot)});
   },[]);
 
   // 初回読み込み
