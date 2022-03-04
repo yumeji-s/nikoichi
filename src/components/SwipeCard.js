@@ -19,7 +19,7 @@ const SCREEN_HEIGHT = Dimensions.get('window').height;
 const SWIPE_THRESHOLD = 0.25 * SCREEN_WIDTH;
 const SWIPE_OUT_DURATION = 250;
 
-const Deck = ({ data }) => {
+const Deck = ({ data, getUserData }) => {
     UIManager.setLayoutAnimationEnabledExperimental &&
       UIManager.setLayoutAnimationEnabledExperimental(true);
     LayoutAnimation.spring();
@@ -100,7 +100,7 @@ const Deck = ({ data }) => {
   
     return (
       <>
-        {index >= data.length && <RenderNoMoreCards />}
+        {index >= data.length && <RenderNoMoreCards getUserData={getUserData} />}
         {data.map((item, i) => {
             if (i < index) {
               return null;
@@ -158,14 +158,14 @@ const Deck = ({ data }) => {
     );
   };
   
-  const RenderNoMoreCards = () => {
+  const RenderNoMoreCards = ({ getUserData }) => {
     return (
       <Card style={styles.cardStyle}>
         <Card.Title style={styles.titleStyle}>おわり</Card.Title>
         <Card.Divider />
         <Text style={styles.textStyle}>あなたにおすすめのユーザが</Text>
         <Text style={styles.textStyle}>いないようです</Text>
-        <Button buttonStyle={styles.buttonStyle} title="もっと探す" onPress={() => {}}/>
+        <Button buttonStyle={styles.buttonStyle} title="もっと探す" onPress={() => {getUserData()}}/>
       </Card>
     );
   };

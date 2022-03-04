@@ -40,6 +40,11 @@ const RegisterScreen = () => {
 
   const handleRegister = async () => {
 
+    if(password.length < 6){
+      alert('パスワードは6文字以上で入力してください');
+      return;
+    }
+
     if(password !== checkPassword){
       alert("同じパスワードを入力してください");
       return;
@@ -47,18 +52,13 @@ const RegisterScreen = () => {
 
     const age = getUserAge(birth);
     if(age < 18){
-      alert("18歳未満の方はご利用いただけません。");
+      alert("18歳未満の方はご利用いただけません");
       return;
     }
 
     try {
       const user = await createUserWithEmailAndPassword(auth, email, password);
-      // 自分がおすすめユーザに表示されないように
-      const requestRef = doc(firestore, `request/${auth.currentUser.uid}/${auth.currentUser.uid}/${auth.currentUser.uid}`);
-      await setDoc(requestRef, {
-        request : false,
-      });
-
+      
       // プロフィールを登録
       const userRef = doc(firestore, `users/${auth.currentUser.uid}`);
       await setDoc(userRef, {
@@ -70,7 +70,14 @@ const RegisterScreen = () => {
         introduction : "",
         sex: sex == '男性' ? 'man':'woman',
       });
+      
+      // 自分がおすすめユーザに表示されないように
+      const requestRef = doc(firestore, `request/${auth.currentUser.uid}/${auth.currentUser.uid}/${auth.currentUser.uid}`);
+      await setDoc(requestRef, {
+        request : false,
+      });
     } catch (error) {
+      alert('登録できないメールアドレスです');
       console.log(error.message);
     }
   };
@@ -235,7 +242,7 @@ const RegisterScreen = () => {
               borderRadius: 10,
             }}
             onPress={handleRegister}
-            disabled={!email || !password || !name || !checkPassword || !sex}
+            disabled={!email || !password || !name || !checkPassword || !sex || !birth}
           >
             <Text style={{ color: 'white' }}>登録する</Text>
           </TouchableOpacity>

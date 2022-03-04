@@ -52,7 +52,12 @@ const MatchUserTabScreen = ({ navigation, user }) => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView style={styles.childContainer}>
+      <ScrollView 
+        style={styles.childContainer}
+        contentContainerStyle={{
+          justifyContent: 'space-between'
+        }}
+      >
         {users.length == 0 ? <NoUsers /> : users.map((user, index) => (
           <ListItem key={index} user={user} navigation={navigation} />
         ))}
@@ -64,7 +69,7 @@ const MatchUserTabScreen = ({ navigation, user }) => {
 const NoUsers = () => (
   <View style={styles.noUserStyle}>
     <Card>
-      <Card.Title style={styles.titleStyle}>マッチしたユーザーがいません...</Card.Title>
+      <Card.Title>マッチしたユーザーがいません...</Card.Title>
       <Card.Divider />
       <Text style={styles.textStyle}>あなたからも積極的にいいねをすればマッチング率アップ！</Text>
     </Card>
@@ -76,15 +81,13 @@ const ListItem = ({ navigation, user }) => (
     style={[styles.flexify, styles.bordered]}
     onPress={() => {navigation.navigate('Confirm', { item: user })}}
   >
-    <View style={{ width: '40%' }}>
+    <View style={styles.cardStyle}>
       <Card>
         <Card.Title>{user.name}</Card.Title>
         <Card.Divider />
-        <Card.Image
-          style={{ padding: 0 }}
-          resizeMode="cover"
-          source={{ uri : user.imgURL ? user.imgURL : undefined }} 
-        />
+        {user.imgURL != ''
+          ? <Card.Image source={{ uri : user.imgURL ? user.imgURL : undefined }}  style={styles.imageStyle} resizeMode="cover" />
+          : <Card.Image source={require('../../assets/defaultUserIcon.png')} style={styles.imageStyle} resizeMode='cover' />}
         <Text style={{ marginBottom: 10 }}>{user.introduction}</Text>
       </Card>
     </View>
@@ -99,10 +102,17 @@ const styles = StyleSheet.create({
   noUserStyle: {
     alignSelf: 'center',
   },
+  cardStyle: {
+    width: '100%',
+    height: '95%',
+    borderRadius: 50,
+  },
+  imageStyle: {
+    width: '100%',
+  },
   childContainer: {
     paddingTop: StatusBar.currentHeight,
     paddingHorizontal: 20,
-    width: '100%',
     marginVertical: 0,
     marginHorizontal: 'auto',
   },

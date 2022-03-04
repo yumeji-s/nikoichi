@@ -37,6 +37,7 @@ const ChatRoomScreen = ({ route, navigation, user }) => {
     const querySnapshot = await getDocs(q);
     querySnapshot.forEach((doc) => {
       setSentinel(doc);
+      console.log(doc);
     });
 
   },[]);
@@ -81,7 +82,7 @@ const ChatRoomScreen = ({ route, navigation, user }) => {
                 alwaysShowSend={true}
                 infiniteScroll={true}
                 isLoadingEarlier={true}
-                // loadEarlier={hasMore}
+                loadEarlier={!hasMore}
                 listViewProps={{
                     onEndReached: readMore(),
                     onEndReachedThreshold: 0.4,
@@ -121,13 +122,11 @@ const useInfiniteSnapshotListener = (chatRoom) => {
 
   //過去メッセージの購読リスナー
   const registPastMessageListener = useCallback((time) => {
-    console.log(time);
     return onSnapshot(query(messageRef, orderBy("createdAt","desc"), startAfter(time), limit(10)), (snapshot) => {dispMsgSnap(snapshot)});
   },[]);
 
   // 初回ロード
   const initRead = useCallback(() => {
-    console.log("init");
     // 未来のメッセージを購読する
     // unsubscribes.current.push(registLatestMessageListener());
     // 現時刻よりも古いデータを一定数、購読する

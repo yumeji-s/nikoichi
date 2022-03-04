@@ -9,19 +9,20 @@ import {
 } from 'react-native';
 import { Avatar, Card, Text } from 'react-native-elements';
 import { getDocs, collection, query, limit, onSnapshot, orderBy } from 'firebase/firestore';
-import { parseISO } from 'date-fns';
-// import { utcToZonedTime } from 'date-fns-tz'
+import { format, getYear, isToday, isYesterday, startOfWeek, isWithinInterval, endOfWeek, subDays, addDays } from 'date-fns';
+import ja from 'date-fns/locale/ja'
+// import { utcToZonedTime, zonedTimeToUtc } from 'date-fns-tz';
 
 import { auth, firestore } from '../../firebase';
-import { messageListener } from '../components/ChatListener';
+// import { messageListener } from '../components/ChatListener';
 import { LoadingScreen } from '../screens/LoadingScreen'
 
 
 const ChatTabScreen = ({ route, navigation }) => {
 
   const [users, setUsers] = useState([]);
-  const unsubscribes = useRef([]);
   const [loading, setLoading] = useState(true);
+  const unsubscribes = useRef([]);
   
   useEffect(async () => {
 
@@ -59,8 +60,8 @@ const ChatTabScreen = ({ route, navigation }) => {
     
     // リスナーを作成
     userList.map((user, index) => {
-      unsubscribes.current.push(chatlistener(user, index));
-    })
+      unsubscribes.current.push(chatListener(user, index));
+    });
 
     if(!unmounted){
       setUsers(userList);
@@ -70,7 +71,7 @@ const ChatTabScreen = ({ route, navigation }) => {
     return () => { unmounted = true; };
   }, []);
 
-  const chatlistener = (user, index) => {
+  const chatListener = (user, index) => {
     
     const messageRef = collection(firestore, `chat/${user.chatRoom}/messages`);
     const q = query(messageRef, orderBy("createdAt","desc"), limit(1));
@@ -120,7 +121,6 @@ const ChatTabScreen = ({ route, navigation }) => {
   const clear = useCallback(() => {
     for(const unsubscribe of unsubscribes.current){
       unsubscribe();
-      console.log('clear');
     }
   },[]);
 
@@ -171,7 +171,7 @@ const ListItem = ({ navigation, user, lastMessage }) => (
       </View>
     </View>
 
-    <Text style={{lineHeight: 40, fontSize: 20, marginRight: 30 }}>{lastMessage != undefined ? getCreateTime(lastMessage.createdAt) : ""}</Text>
+    <Text style={{lineHeight: 40, fontSize: 20, marginRight: 30 }}>{lastMessage != undefined ? getCreateTime(lastMessage.createdAt) : ''}</Text>
   </TouchableOpacity>
 );
 
@@ -181,11 +181,31 @@ const getCreateTime = (createdAt) => {
     return '';
   }
   // 今日なら時間、一週間以内なら曜日、今年なら月日、それ以前なら年月日
-  // const today = utcToZonedTime(new Date(), 'Asia/Tokyo');
-  let format = 'hh:mm';
-  format = format.replace(/hh/g, createdAt.getHours());
-  format = format.replace(/mm/g, createdAt.getMinutes());
-  return format;
+  const now = new Date();
+  let sendAt = '';
+
+  if(isToday(createdAt)){
+    sendAt = format(createdAt, 'H:m');
+  }else if(isYesterday(createdAt)){
+    sendAt = '昨日';
+  }else if(isWithinInterval(createdAt, { start: subDays(now, 6), end: addDays(now, 1) })){
+    sendAt = format(createdAt, 'eeee', {locale: ja});
+  }else if(getYear(now) == getYear(createdAt)){
+    sendAt = format(createdAt, 'M/d');
+  }else{
+    sendAt = format(createdAt, 'YYY/MM/DD');
+  }
+
+  // タイムゾーンを変更していても日本時間で表示したいけどライブラリがうまく動かん
+  // なんで動かんの？
+  // const utcDate = new Date()
+  // console.log('utcDate',utcDate);
+  // const jstDate = utcToZonedTime(utcDate, 'Asia/Tokyo')
+  // console.log(jstDate);
+  // const jstString = format(jstDate, 'yyyy-MM-dd HH:mm:ss')
+  // console.log(jstString);
+
+  return sendAt;
 }
 
 const styles = StyleSheet.create({

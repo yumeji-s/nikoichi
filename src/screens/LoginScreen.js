@@ -22,6 +22,7 @@ const LoginScreen = () => {
       await signInWithEmailAndPassword(auth, email, password);
       console.log("login");
     } catch (error) {
+      alert('メールアドレスまたはパスワードが間違っています');
       console.log(error.message);
     }
   };
@@ -74,7 +75,7 @@ const LoginScreen = () => {
           borderRadius: 10,
         }}
         onPress={handleLogin}
-        // disabled={!email || !password}
+        disabled={!email || !password}
       >
         <Text style={{ color: 'white' }}>ログイン</Text>
       </TouchableOpacity>
