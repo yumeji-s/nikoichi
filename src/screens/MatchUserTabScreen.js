@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useReducer } from 'react';
+import React, { useState, useEffect, useReducer, useCallback, useRef } from 'react';
 import { StyleSheet } from 'react-native';
 import {
   View,
@@ -7,8 +7,8 @@ import {
   ScrollView,
   StatusBar,
 } from 'react-native';
-import { Text, Card } from 'react-native-elements';
-import { getDocs, collection } from 'firebase/firestore';
+import { Button, Text, Card } from 'react-native-elements';
+import { getDocs, collection, query, where, onSnapshot } from 'firebase/firestore';
 
 import { auth, firestore } from '../../firebase';
 
@@ -16,39 +16,78 @@ import { auth, firestore } from '../../firebase';
 const MatchUserTabScreen = ({ navigation, user }) => {
 
   const [users, setUsers] = useState([]);
-  const [index, setIndex] = useState(0);
+  // const [index, setIndex] = useState(0);
+  const unsubscribes = useRef([]);
 
-  useEffect(() => getChatList(), [])
+  // useEffect(() => getChatList(), []);
 
-  const getChatList = async () => {
+  // const getChatList = async () => {
 
-    // マッチングしたユーザのuid取得
+  //   // マッチングしたユーザのuid取得
+  //   // const matchingRef = collection(firestore, `matching/${auth.currentUser.uid}/${auth.currentUser.uid}`);
+  //   // const matchingSnap = await getDocs(matchingRef);
+  //   // let matchingList = [];
+  //   // let chatNameList = [];
+  //   // matchingSnap.docs.forEach((doc) => {
+  //   //   matchingList.push(doc.id);
+  //   //   chatNameList.push(doc.data().chatName);
+  //   // });
+
+    // const matchingUserRef = collection(firestore, `users`);
+    // const matchingUserSnap = await getDocs(matchingUserRef);
+
+    // let userList = [];
+    // matchingUserSnap.docs.forEach((doc) => {
+    //   const i = matchingList.indexOf(doc.id);
+    //   if(i != -1){
+    //     userList.push(
+    //       {
+    //         ...doc.data(),
+    //         chatRoom : chatNameList[i],
+    //       }
+    //     );
+    //   }
+    // });
+  //   // setUsers(userList);
+  // }
+  useEffect(() => {
+    unsubscribes.current.push(matchListener());
+  }, []);
+  const matchListener = () => {
+    
     const matchingRef = collection(firestore, `matching/${auth.currentUser.uid}/${auth.currentUser.uid}`);
-    const matchingSnap = await getDocs(matchingRef);
-    let matchingList = [];
-    let chatNameList = [];
-    matchingSnap.docs.forEach((doc) => {
-      matchingList.push(doc.id);
-      chatNameList.push(doc.data().chatName);
+    const q = query(matchingRef);
+    return onSnapshot(q, async (snapshot) => {
+      // マッチした人の uid 取得
+      const datas = snapshot.docs.map((doc) => {
+        return { uid: doc.id, chatName: doc.data().chatName };
+      });
+      // uid からユーザ情報を取得
+      
+      datas.map(async (data) => {
+        const q = query(collection(firestore, `users`), where('uid', '==', data.uid));
+        const matchingUserSnap = await getDocs(q);
+        let userList = [];
+        matchingUserSnap.forEach((doc) => {
+          userList.push(
+            {
+              ...doc.data(),
+              chatRoom : data.chatName,
+            }
+          );
+        });
+        setUsers((prevUsers) => prevUsers.concat(userList));
+      });
     });
-
-    const matchingUserRef = collection(firestore, `users`);
-    const matchingUserSnap = await getDocs(matchingUserRef);
-
-    let userList = [];
-    matchingUserSnap.docs.forEach((doc) => {
-      const i = matchingList.indexOf(doc.id);
-      if(i != -1){
-        userList.push(
-          {
-            ...doc.data(),
-            chatRoom : chatNameList[i],
-          }
-        );
-      }
-    });
-    setUsers(userList);
   }
+
+  const clear = useCallback(() => {
+    for(const unsubscribe of unsubscribes.current){
+      unsubscribe();
+    }
+  },[]);
+
+  useEffect(() => { return () => clear() }, [clear]);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -79,7 +118,7 @@ const NoUsers = () => (
 const ListItem = ({ navigation, user }) => (
   <TouchableOpacity
     style={[styles.flexify, styles.bordered]}
-    onPress={() => {navigation.navigate('Confirm', { item: user })}}
+    onPress={() => {navigation.navigate('Chatroom', {chatRoom: user.chatRoom, name: user.name})}}
   >
     <View style={styles.cardStyle}>
       <Card>
@@ -89,6 +128,7 @@ const ListItem = ({ navigation, user }) => (
           ? <Card.Image source={{ uri : user.imgURL ? user.imgURL : undefined }}  style={styles.imageStyle} resizeMode="cover" />
           : <Card.Image source={require('../../assets/defaultUserIcon.png')} style={styles.imageStyle} resizeMode='cover' />}
         <Text style={{ marginBottom: 10 }}>{user.introduction}</Text>
+        <Button buttonStyle={styles.buttonStyle} title="プロフィールを見る" onPress={() => {navigation.navigate('Confirm', { item: user })}} />
       </Card>
     </View>
   </TouchableOpacity>
@@ -126,6 +166,12 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderColor: '#f5f5f5',
     paddingVertical: 10,
+  },
+  buttonStyle: {
+    borderRadius: 50,
+    marginLeft: 0,
+    marginRight: 0,
+    marginBottom: 0,
   },
 })
 

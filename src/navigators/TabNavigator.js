@@ -89,6 +89,15 @@ const MatchUserStackNavigator = ({ user }) => (
     >
       {(props) => <ConfirmProfileScreen {...props} user={user} />}
     </Stack.Screen>
+    <Stack.Screen
+      name="Chatroom"
+      options={{
+        headerBackTitleVisible: false,
+        headerShown: false,
+      }}
+    >
+      {(props) => <ChatRoomScreen {...props} user={user} />}
+    </Stack.Screen>
   </Stack.Navigator>
 )
 
@@ -172,12 +181,13 @@ const UserTabs = ({ user }) => {
     <ChildTab.Navigator
       initialRouteName="bestUser"
       screenOptions={({ route }) => ({
-        "tabBarStyle": [
+        tabBarStyle: [
           {
             "display": "flex",
           },
           null
-        ]
+        ],
+        swipeEnabled : false
       })}
     >
       <ChildTab.Screen name="bestUser" options={{ tabBarLabel: 'おすすめ' }}>
@@ -224,7 +234,8 @@ const ChatTabs = ({ user }) => {
             'display': 'flex',
           },
           null
-        ]
+        ],
+        swipeEnabled : false
       })}
     >
       <ChildTab.Screen name="matchUser" options={{ tabBarLabel: 'マッチング' }}>

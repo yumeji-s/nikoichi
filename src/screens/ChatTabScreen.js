@@ -8,14 +8,14 @@ import {
   StatusBar,
 } from 'react-native';
 import { Avatar, Card, Text } from 'react-native-elements';
-import { getDocs, collection, query, limit, onSnapshot, orderBy } from 'firebase/firestore';
+import { getDocs, collection, query, limit, onSnapshot, orderBy, where } from 'firebase/firestore';
 import { format, getYear, isToday, isYesterday, startOfWeek, isWithinInterval, endOfWeek, subDays, addDays } from 'date-fns';
-import ja from 'date-fns/locale/ja'
+import ja from 'date-fns/locale/ja';
 // import { utcToZonedTime, zonedTimeToUtc } from 'date-fns-tz';
 
 import { auth, firestore } from '../../firebase';
 // import { messageListener } from '../components/ChatListener';
-import { LoadingScreen } from '../screens/LoadingScreen'
+import { LoadingScreen } from '../screens/LoadingScreen';
 
 
 const ChatTabScreen = ({ route, navigation }) => {
@@ -24,54 +24,84 @@ const ChatTabScreen = ({ route, navigation }) => {
   const [loading, setLoading] = useState(true);
   const unsubscribes = useRef([]);
   
-  useEffect(async () => {
+  // useEffect(async () => {
 
-    let unmounted = false;
+  //   let unmounted = false;
 
-    // マッチングしたユーザのuid取得
-    const matchingRef = collection(firestore, `matching/${auth.currentUser.uid}/${auth.currentUser.uid}`);
-    const matchingSnap = await getDocs(matchingRef);
-    let matchingList = [];
-    let chatNameList = [];
-    matchingSnap.docs.forEach((doc) => {
-      matchingList.push(doc.id);
-      chatNameList.push(doc.data().chatName);
-    });
+  //   // マッチングしたユーザのuid取得
+  //   const matchingRef = collection(firestore, `matching/${auth.currentUser.uid}/${auth.currentUser.uid}`);
+  //   const matchingSnap = await getDocs(matchingRef);
+  //   let matchingList = [];
+  //   let chatNameList = [];
+  //   matchingSnap.docs.forEach((doc) => {
+  //     matchingList.push(doc.id);
+  //     chatNameList.push(doc.data().chatName);
+  //   });
 
-    // とりあえずユーザ全員取得
-    // 後で10件ずつ検索してこれるように変更
-    const matchingUserRef = collection(firestore, `users`);
-    const matchingUserSnap = await getDocs(matchingUserRef);
-    let userList = [];
-    matchingUserSnap.docs.forEach((doc) => {
+  //   // とりあえずユーザ全員取得
+  //   // 後で10件ずつ検索してこれるように変更
+  //   const matchingUserRef = collection(firestore, `users`);
+  //   const matchingUserSnap = await getDocs(matchingUserRef);
+  //   let userList = [];
+  //   matchingUserSnap.docs.forEach((doc) => {
 
-      // マッチした人がいるか検索
-      const i = matchingList.indexOf(doc.id);
-      // いたらユーザリストに追加
-      if(i != -1){
-        userList.push(
-          {
-            ...doc.data(),
-            chatRoom : chatNameList[i],
-          }
-        );
-      }
-    });
+  //     // マッチした人がいるか検索
+  //     const i = matchingList.indexOf(doc.id);
+  //     // いたらユーザリストに追加
+  //     if(i != -1){
+  //       userList.push(
+  //         {
+  //           ...doc.data(),
+  //           chatRoom : chatNameList[i],
+  //         }
+  //       );
+  //     }
+  //   });
     
-    // リスナーを作成
-    userList.map((user, index) => {
-      unsubscribes.current.push(chatListener(user, index));
-    });
+  //   // リスナーを作成
+  //   userList.map((user, index) => {
+  //     unsubscribes.current.push(chatListener(user, index));
+  //   });
 
-    if(!unmounted){
-      setUsers(userList);
-      setLoading(false);
-    }
+  //   if(!unmounted){
+  //     setUsers(userList);
+  //     setLoading(false);
+  //   }
 
-    return () => { unmounted = true; };
+  //   return () => { unmounted = true; };
+  // }, []);
+  useEffect(() => {
+    unsubscribes.current.push(matchListener());
+    setLoading(false);
   }, []);
+  const matchListener = () => {
+    
+    const matchingRef = collection(firestore, `matching/${auth.currentUser.uid}/${auth.currentUser.uid}`);
+    const q = query(matchingRef);
+    return onSnapshot(q, async (snapshot) => {
+      // マッチした人の uid 取得
+      const datas = snapshot.docs.map((doc) => {
+        return { uid: doc.id, chatName: doc.data().chatName };
+      });
+      // uid からユーザ情報を取得
+      datas.map(async (data) => {
+        const q = query(collection(firestore, `users`), where('uid', '==', data.uid));
+        const matchingUserSnap = await getDocs(q);
+        let user = [];
+        matchingUserSnap.forEach((doc) => {
+          const partner = {
+            ...doc.data(),
+            chatRoom : data.chatName
+          };
+          user.push(partner);
+          unsubscribes.current.push(chatListener(partner));
+        });
+        setUsers((prevUsers) => prevUsers.concat(user));
+      });
+    });
+  }
 
-  const chatListener = (user, index) => {
+  const chatListener = (user) => {
     
     const messageRef = collection(firestore, `chat/${user.chatRoom}/messages`);
     const q = query(messageRef, orderBy("createdAt","desc"), limit(1));
@@ -106,14 +136,22 @@ const ChatTabScreen = ({ route, navigation }) => {
           }
         };
       }
-
       // state（連想配列の配列）の一部だけ更新
       setUsers((prevUsers) =>
-        prevUsers.map((user, i) => (
-          i == index 
-            ? { ...user, messages : msg}
-            : user
+        prevUsers.map((prevUser) => (
+          prevUser.uid == user.uid 
+            ? { ...prevUser, messages : msg }
+            : prevUser
         ))
+      );
+      setUsers((prevUsers) =>
+        prevUsers.sort((a, b) => {
+          if(a.messages == undefined) return 1;
+          if(b.messages == undefined) return 0;
+          if(a.messages.createdAt > b.messages.createdAt) return -1;
+          if(a.messages.createdAt < b.messages.createdAt) return 1;
+          return 0;
+        })
       );
     });
   }
@@ -185,7 +223,7 @@ const getCreateTime = (createdAt) => {
   let sendAt = '';
 
   if(isToday(createdAt)){
-    sendAt = format(createdAt, 'H:m');
+    sendAt = format(createdAt, 'H:mm');
   }else if(isYesterday(createdAt)){
     sendAt = '昨日';
   }else if(isWithinInterval(createdAt, { start: subDays(now, 6), end: addDays(now, 1) })){

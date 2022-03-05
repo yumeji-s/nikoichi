@@ -105,10 +105,10 @@ const Deck = ({ data }) => {
     const onSwipeLeft = async (partner) => {
       
       // 嫌いの時、表示されないようにする
-      const requestRef = doc(firestore, `request/${auth.currentUser.uid}/${auth.currentUser.uid}/${partner.uid}`);
-      await updateDoc(requestRef, {
-        request : false,
-      },{ capital: true });
+      // const requestRef = doc(firestore, `request/${auth.currentUser.uid}/${auth.currentUser.uid}/${partner.uid}`);
+      // await updateDoc(requestRef, {
+      //   request : false,
+      // },{ capital: true });
       
     };
   

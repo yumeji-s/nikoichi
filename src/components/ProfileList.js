@@ -46,7 +46,7 @@ const Item = ( {title, select} ) => {
 };
 
 // 自己紹介文
-const Introduction = ( { introduction } ) => {
+const Introduction = ( { introduction = '' } ) => {
   const [showModal, setShowModal] = useState(false);
   const [value, setValue] = useState(introduction);
   const [originIntroduction, setOriginIntroduction] = useState(value);

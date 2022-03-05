@@ -10,12 +10,17 @@ import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 
 import { auth, firestore, storage } from '../../firebase';
 import { ProfileList, Introduction } from '../components/ProfileList';
+import { LoadingScreen } from '../screens/LoadingScreen';
 
 const ProfileScreen = ({ navigation, user }) => {
   
   const [icon, setIcon] = useState(user.imgURL);
   const [iconUpdateAt, setIconUpdateAt] = useState(null);
+  const [loading, setLoading] = useState(true);
  
+  useEffect(() => {
+    setLoading(false);
+  }, []);
 
   // 画像フォルダを開く
   const pickImage = async () => {
@@ -66,6 +71,10 @@ const ProfileScreen = ({ navigation, user }) => {
       setIcon(url);
     });
   };
+
+  if(loading){
+    return <LoadingScreen/>
+  }
 
   return (
     <NativeBaseProvider>

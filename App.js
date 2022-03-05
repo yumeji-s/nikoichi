@@ -12,6 +12,7 @@ LogBox.ignoreLogs([
   '[react-native-gesture-handler] Seems like you\'re using an old API with gesture components, check out new Gestures system!',     // ライブラリのどっかに書いてあって非表示にするしかないよ
   'Setting a timer',              // expo と firebase 使ってると絶対出るよ、今のところ非表示にしとくしかないよ
   'AsyncStorage has been',        // AsyncStorageそのうち置き換わるよ
+  'expo-permissions is now deprecated',        // 代替メソッドがあるからあとで置き換える
 ]);
 
 const App = () => {

@@ -53,7 +53,8 @@ const makeItem = (items) => {
 }
 
 const profileItem = {
-    'age': prefectures,
+    'age': children,
+    'sex': children,
     'address': prefectures,
     'workplace': prefectures,
     'birthplace': prefectures,

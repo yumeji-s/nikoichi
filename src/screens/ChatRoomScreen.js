@@ -1,5 +1,5 @@
 import React, { useCallback, useState, useEffect, useRef } from 'react';
-import { StyleSheet, TouchableOpacity, StatusBar, Dimensions } from 'react-native';
+import { StyleSheet, TouchableOpacity, Dimensions } from 'react-native';
 import { Overlay } from 'react-native-elements';
 import { GiftedChat } from 'react-native-gifted-chat';
 import { View, Text, NativeBaseProvider, Modal } from 'native-base'; 
@@ -11,17 +11,16 @@ import { renderInputToolbar, renderActions, renderComposer, renderSend } from '.
 import { auth, firestore } from '../../firebase';
 // import { useInfiniteSnapshotListener } from '../components/ChatListener';
 
-
-
-
 const ChatRoomScreen = ({ route, navigation, user }) => {
     
-  // const [messages, setMessages] = useState([]);                          // 全メッセージ
+  const [messages, setMessages] = useState([]);                          // 全メッセージ
   const [currentUser, setCurrentUser] = useState(user);                     // ログインしているユーザ
-  const [sentinel, setSentinel] = useState();                               // 最後のメッセージのid
+  // const [sentinel, setSentinel] = useState();                               // 最後のメッセージのid
   const { chatRoom, name } = route.params;                                  // チャットルーム名、チャット相手の名前
   const messageRef = collection(firestore, `chat/${chatRoom}/messages`);    // メッセージ登録用
-  const { messages, readMore, initRead } = useInfiniteSnapshotListener(chatRoom);
+  // const { messages, readMore, initRead } = useInfiniteSnapshotListener(chatRoom);
+
+  const unsubscribes = useRef([]);
 
   const [showModal, setShowModal] = useState(true);
 
@@ -33,28 +32,80 @@ const ChatRoomScreen = ({ route, navigation, user }) => {
   useEffect(async () => {
 
     // 最後の（一番日付の早い）メッセージを取得
-    const q = query(messageRef, orderBy('createdAt','asc'), limit(1));
-    const querySnapshot = await getDocs(q);
-    querySnapshot.forEach((doc) => {
-      setSentinel(doc);
-      console.log(doc);
-    });
+    // const q = query(messageRef, orderBy('createdAt','asc'), limit(1));
+    // const querySnapshot = await getDocs(q);
+    // querySnapshot.forEach((doc) => {
+    //   setSentinel(doc);
+    //   console.log(doc);
+    // });
+
+    unsubscribes.current.push(chatListener());
 
   },[]);
 
   // 初回読み込み
-  useEffect(()=>{
-    initRead();
-  },[initRead]);
+  // useEffect(()=>{
+  //   initRead();
+  // },[initRead]);
 
   // メッセージは残っているか
-  const hasMore = sentinel ? !Boolean(messages.find(m => m.id === sentinel.id)) : false;  
-  console.log('hasMore = '+hasMore + 'sentinel = ' + sentinel);
+  // const hasMore = sentinel ? !Boolean(messages.find(m => m.id === sentinel.id)) : false;  
+
+  const chatListener = (user, index) => {
+    
+    const messageRef = collection(firestore, `chat/${chatRoom}/messages`);
+    const q = query(messageRef, orderBy("createdAt","asc"));
+    return onSnapshot(q, (snapshot) => {
+      dispMsgSnap(snapshot);
+    });
+  }
+
+  const clear = useCallback(() => {
+    for(const unsubscribe of unsubscribes.current){
+      unsubscribe();
+    }
+  },[]);
+
+  useEffect(() => { return () => clear() }, [clear]);
+
+  const dispMsgSnap = (snapshot) => {
+    // 取得したメッセージを表示できるように加工
+    snapshot.docChanges().forEach((change) => {
+      const id = change.doc.id;
+      const chat = change.doc.data();
+      const newMessage = {
+        _id: id,
+        text: chat.text,
+        createdAt: chat.createdAt.toDate(),
+        user: {
+          _id: chat.user._id,
+          name: chat.user.name,
+          avatar: chat.user.avatar
+        }
+      };
+      switch(change.type){
+        case 'added':
+          msgAppend(newMessage);
+          break;
+        case 'modified':
+          break;
+        case 'removed':
+          break;
+        default: 
+          break;
+      }
+    });
+  };
+  
+  const msgAppend = (newMessage = []) => {
+    // メッセージを連結
+    setMessages((previousMessages) => GiftedChat.append(previousMessages,newMessage));
+  };
 
   // 送信時の処理
   const onSend = async (messages = []) => {
     // メッセージをfirestoreに登録
-    console.log(messages);
+    // console.log(messages);
     const messageSnap = await addDoc(messageRef, ...messages);
   };
 
@@ -82,11 +133,11 @@ const ChatRoomScreen = ({ route, navigation, user }) => {
                 alwaysShowSend={true}
                 infiniteScroll={true}
                 isLoadingEarlier={true}
-                loadEarlier={!hasMore}
-                listViewProps={{
-                    onEndReached: readMore(),
-                    onEndReachedThreshold: 0.4,
-                }}
+                // loadEarlier={hasMore}
+                // listViewProps={{
+                //     onEndReached: readMore(),
+                //     onEndReachedThreshold: 0.4,
+                // }}
                 renderInputToolbar={renderInputToolbar}
                 renderActions={renderActions}
                 renderComposer={renderComposer}
@@ -106,88 +157,87 @@ const ChatRoomScreen = ({ route, navigation, user }) => {
   );
 }
 
-const now = new Date();
-console.log(now);
-const useInfiniteSnapshotListener = (chatRoom) => {
+// const now = new Date();
+// console.log(now);
+// const useInfiniteSnapshotListener = (chatRoom) => {
 
-  const unsubscribes = useRef([]);
-  const [messages, setMessages] = useState([]);
-  const messageRef = collection(firestore, `chat/${chatRoom}/messages`);  // メッセージ登録用
+//   const unsubscribes = useRef([]);
+//   const [messages, setMessages] = useState([]);
+//   const messageRef = collection(firestore, `chat/${chatRoom}/messages`);  // メッセージ登録用
   
 
-  // 未来（最新メッセージ）の購読リスナー
-  // const registLatestMessageListener = useCallback(() => {
-  //   return onSnapshot(query(messageRef, orderBy("createdAt","asc"), startAfter(now)), (snapshot) => {dispMsgSnap(snapshot)});
-  // },[]);
+//   // 未来（最新メッセージ）の購読リスナー
+//   // const registLatestMessageListener = useCallback(() => {
+//   //   return onSnapshot(query(messageRef, orderBy("createdAt","asc"), startAfter(now)), (snapshot) => {dispMsgSnap(snapshot)});
+//   // },[]);
 
-  //過去メッセージの購読リスナー
-  const registPastMessageListener = useCallback((time) => {
-    return onSnapshot(query(messageRef, orderBy("createdAt","desc"), startAfter(time), limit(10)), (snapshot) => {dispMsgSnap(snapshot)});
-  },[]);
+//   //過去メッセージの購読リスナー
+//   const registPastMessageListener = useCallback((time) => {
+//     return onSnapshot(query(messageRef, orderBy("createdAt","desc"), startAfter(time), limit(10)), (snapshot) => {dispMsgSnap(snapshot)});
+//   },[]);
 
-  // 初回ロード
-  const initRead = useCallback(() => {
-    // 未来のメッセージを購読する
-    // unsubscribes.current.push(registLatestMessageListener());
-    // 現時刻よりも古いデータを一定数、購読する
-    unsubscribes.current.push(registPastMessageListener(now));
-  },[registPastMessageListener]);
+//   // 初回ロード
+//   const initRead = useCallback(() => {
+//     // 未来のメッセージを購読する
+//     // unsubscribes.current.push(registLatestMessageListener());
+//     // 現時刻よりも古いデータを一定数、購読する
+//     unsubscribes.current.push(registPastMessageListener(now));
+//   },[registPastMessageListener]);
 
-  // スクロール時、追加購読するためのリスナー
-  const lastMessageDate = messages.length > 0 ? messages[messages.length - 1].createdAt : now;
+//   // スクロール時、追加購読するためのリスナー
+//   const lastMessageDate = messages.length > 0 ? messages[messages.length - 1].createdAt : now;
   
-  const readMore = useCallback(() => {
-    console.log("readMore"+lastMessageDate);
-    // unsubscribes.current.push(registPastMessageListener(lastMessageDate));
-  },[registPastMessageListener,lastMessageDate]);
+//   const readMore = useCallback(() => {
+//     console.log("readMore"+lastMessageDate);
+//     // unsubscribes.current.push(registPastMessageListener(lastMessageDate));
+//   },[registPastMessageListener,lastMessageDate]);
 
-  // 登録解除(Unmount時に解除）
-  const clear = useCallback(() => {
-    for(const unsubscribe of unsubscribes.current){
-      unsubscribe();
-    }
-  },[]);
+//   // 登録解除(Unmount時に解除）
+//   const clear = useCallback(() => {
+//     for(const unsubscribe of unsubscribes.current){
+//       unsubscribe();
+//     }
+//   },[]);
 
-  useEffect(() => { return () => { clear(); }; }, [clear]);
+//   useEffect(() => { return () => { clear(); }; }, [clear]);
 
 
-  const dispMsgSnap = (snapshot) => {
-    // 取得したメッセージを表示できるように加工
-    console.log("disp");
-    snapshot.docChanges().forEach((change) => {
-      // console.log(change.doc.data());
-      const id = change.doc.id;
-      const chat = change.doc.data();
-      const newMessage = {
-        _id: id,
-        text: chat.text,
-        createdAt: chat.createdAt.toDate(),
-        user: {
-          _id: chat.user._id,
-          name: chat.user.name,
-          avatar: chat.user.avatar
-        }
-      };
-      switch(change.type){
-      case 'added':
-        msgAppend(newMessage);
-        break;
-      case 'modified':
-        break;
-      case 'removed':
-        break;
-      default: 
-        break;
-      }
-    });
-  };
+  // const dispMsgSnap = (snapshot) => {
+  //   // 取得したメッセージを表示できるように加工
+  //   snapshot.docChanges().forEach((change) => {
+  //     console.log(change.doc.data());
+  //     const id = change.doc.id;
+  //     const chat = change.doc.data();
+  //     const newMessage = {
+  //       _id: id,
+  //       text: chat.text,
+  //       createdAt: chat.createdAt.toDate(),
+  //       user: {
+  //         _id: chat.user._id,
+  //         name: chat.user.name,
+  //         avatar: chat.user.avatar
+  //       }
+  //     };
+  //     switch(change.type){
+          // case 'added':
+          //   msgAppend(newMessage);
+          //   break;
+          // case 'modified':
+          //   break;
+          // case 'removed':
+          //   break;
+          // default: 
+          //   break;
+  //     }
+  //   });
+  // };
   
-  const msgAppend = (newMessage = []) => {
-    // メッセージを連結
-    setMessages((previousMessages) => GiftedChat.append(previousMessages,newMessage));
-  };
-  return { initRead, readMore, messages };
-};
+  // const msgAppend = (newMessage = []) => {
+  //   // メッセージを連結
+  //   setMessages((previousMessages) => GiftedChat.append(previousMessages,newMessage));
+  // };
+//   return { initRead, readMore, messages };
+// };
 
 
 

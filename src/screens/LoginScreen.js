@@ -20,7 +20,6 @@ const LoginScreen = () => {
   const handleLogin = async () => {
     try {
       await signInWithEmailAndPassword(auth, email, password);
-      console.log("login");
     } catch (error) {
       alert('メールアドレスまたはパスワードが間違っています');
       console.log(error.message);

@@ -52,10 +52,9 @@ const FromPartnerScreen = ({ navigation, user }) => {
 
     return onSnapshot(q, async (snapshot) => {
       // 最大10件取得
-      let uids = snapshot.docs.map((doc) => {
+      const uids = snapshot.docs.map((doc) => {
         return doc.id;
       });
-      
       // リクエストをくれたユーザデータの配列を更新
       const datas = await getUserData(uids);
       setData(datas);

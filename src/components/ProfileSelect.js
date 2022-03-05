@@ -18,8 +18,6 @@ export const updateProfile = (key, data) => {
     }
 }
 
-
-
 export const getSelect = (key, val) => {
     return (
         <RNPickerSelect
