@@ -66,7 +66,7 @@ const ChatRoomScreen = ({ route, navigation, user }) => {
     }
   },[]);
 
-  useEffect(() => { return () => clear() }, [clear]);
+  useEffect(() => { return () => {console.log('clear');clear()} }, [clear]);
 
   const dispMsgSnap = (snapshot) => {
     // 取得したメッセージを表示できるように加工
