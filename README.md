@@ -17,7 +17,32 @@
 2．リポジトリをコピー
 コマンド	git clone https://github.com/yumeji-s/nikoichi.git
 
-3．firebase を始めて firebase.js のファイルにプロジェクトIDなどを貼り付ける
+3．firebase を始めて App.js とかと同じ階層に firebase.js という名前のファイルを作り、以下を貼り付け、自分の firebase プロジェクトの config情報 を貼り付ける
+
+/*-------------------------------------------------------------*/
+import { initializeApp } from "firebase/app";
+import { getAuth } from "firebase/auth";
+import { getFirestore } from "firebase/firestore";
+import { getStorage } from "firebase/storage";
+
+const firebaseConfig = {
+  // ここにプロジェクトIDなどを貼り付ける
+  // ここにプロジェクトIDなどを貼り付ける
+  // ここにプロジェクトIDなどを貼り付ける
+  // ここにプロジェクトIDなどを貼り付ける
+  // ここにプロジェクトIDなどを貼り付ける
+  // ここにプロジェクトIDなどを貼り付ける
+};
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+
+export const auth = getAuth(app);
+export const firestore = getFirestore(app);
+export const storage = getStorage(app);
+/*-------------------------------------------------------------*/
+
+
 
 4．必要なライブラリをインストール（yarn.lockに書いてあるから以下のコマンドだけでインストールできる）
 コマンド	yarn
